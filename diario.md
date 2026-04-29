@@ -15,7 +15,10 @@ Familiarizado con el método del proyecto, leo la sección de Quantum Error Corr
 
 Leo secciones de interés de la tesis doctoral “Novel Methods for Classical Simulation of Quantum Circuits via ZX-calculus”, de Matthew Stutcliffe. Adquiero familiaridad con ZX-calculus y reglas de reescritura, y leo las secciones relacionadas con kernel.
 
-Encuentro una librería de ZX-calculus en python de interés para el proyecto. Debo estudiar bien lattice surgery, rewrites.
+Encuentro una librería de ZX-calculus en python de interés para el proyecto (pyZX). Debo estudiar bien lattice surgery, rewrites.
 
 Juani quiere que mire cuestiones de teleportation y protocolos que se puedan ejecutar en código abierto con ZX calculus.
 
+Elijo libreria pyzx. Hay que explicar este repositorio a la gente del Fisymat. Explicar ZX en términos de físicos. Relacionar topologia algebraica y homología. Buscar dependencias de pyzx. Circuitos que parecen grafos.
+
+Artículo de ZX con lattice surgery. Intentar código para circuitos del paper de Beaudrap. Relacionar con Filipa con surface code para hacer CZ CCZ en 3D. Papers Horsman, Browne, Filipa. Simetría en Filipa  para reducción de puertas, simetría en Horsman para recompilar, etc... Simetría como tema central y quantum compiling.
