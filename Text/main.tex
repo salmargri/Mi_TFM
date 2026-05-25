@@ -1,0 +1,75 @@
+% !TeX root = main.tex
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[style=numeric, backend=biber]{biblatex}
+\addbibresource{referencias.bib}
+\usepackage{amsmath, amssymb,}
+\usepackage{amsthm}
+\usepackage{geometry}
+\usepackage{braket}
+\geometry{top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usetikzlibrary{quantikz2}
+
+\newtheorem{theorem}{Teorema}
+\newtheorem{proposition}{Proposición} 
+\newtheorem{definition}[proposition]{Definición}
+
+\begin{document}
+
+\section{Quantum Error Correction}
+
+The main challenge of quantum computation is the fragility of the physical systems that are used to implement the qubits. In classical computation, information is encoded in macroscopic physical variables, and the logical states are separated by energy barriers that make them robust against enviromental fluctuations. Compared to classical bits, qubits are heavily affected by enviromental noise, which makes them degrade and lose their information due to decoherence. It is thus necessary to explore the most efficient ways to protect quantum information while maintaining the practical feasibility of operating with those protected qubits. \\
+
+Fathoming the differences between classical and quantum error-corecting codes makes it necessary to pay attention to three difficulties that arise when we deal with quantum systems: The no-cloning theorem,, which prevents us from duplicating the state of a qubit; the continuous nature of errors; and the fact that observation in quantum mechanics collapses the wave function in one of the eigenstates of the measured observable (this is a non-unitary process, and thus recovery is impossible) \\  
+
+In order to overcome these difficulties, quantum error-correcting codes (QECC) utilze entanglement to encode a logical qubit across a multi-qubit system. This way, we can protect the quantum information via redundancy, without violating the no-cloning theorem. QEC protocols measure multi-qubit parity operators (error syndromes), avoiding the collapse of the wave function. The continuity problem will be confronted by discretizing the errors into a finite set of Pauli operations.\\
+
+We will build some basic intuition about quantum error correction models based on redundancy by looking at one of its earliest and simplest examples: the Shor Nine-Qubit Code. \\
+
+Consider that we have physical qubits that are subject to random bit-flip errors, that is, with a certain probability $p$, the state $\ket{ \psi }$ is transformed into $X \ket{ \psi }$. As we cannot simply duplicate our original qubit, we can entangle it with two ancilla qubits initialized in the $\ket{0}$ state by applying two CNOT gates, where the original qubit is the control and the ancilla qubits are the targets. If our original state is $\ket{ \psi } = \alpha \ket{0} + \beta \ket{1}$, the resulting state will be $\ket{ \psi_L } = \alpha \ket{000} + \beta \ket{111}$. The encoding establishes a logical basis with states: 
+
+\begin{align*}
+    \ket{0_L} = \ket{000} \\
+    \ket{1_L} = \ket{111}
+\end{align*}
+
+If the bit-flip error occurs in any qubit, we can diagnose this error without destroying the superposition by measuring the parity observables $Z_1 Z_2$ and $Z_2 Z_3$. Those observables compare the parities of their corresponding qubits, yielding a $\pm 1$ eigenvalue, positive if both compared qubits share the same state, negative if they are different. It is crucial to note that the measurement of the parity operators commute with the logical operators, ensuring that the superposition remains intact. Once we have detected the error, we can apply the appropiate recovery operation. \\
+
+This same procedure can be adapted to protect against phase-flip errors, modeled by the Pauli $Z$ operator. This is performed by applying a Hadamard transformation to each qubit after applying two sequential CNOT gates. It is an identical procedure, and it only differs in the basis we are working with. \\
+
+If we concatenate the bit-flip and phase-flip codes, we can protect against an arbitrary error on a single qubit. This is therefore a nine qubit code, with the bases states defined as follows:
+
+\begin{align*}
+    \ket{0_L} = \frac{1}{2 \sqrt{2}} (\ket{000} + \ket{111}) (\ket{000} + \ket{111}) (\ket{000} + \ket{111}) \\
+    \ket{1_L} = \frac{1}{2 \sqrt{2}} (\ket{000} - \ket{111}) (\ket{000} - \ket{111}) (\ket{000} - \ket{111})
+\end{align*}
+
+\begin{figure}[h]
+\centering
+\begin{quantikz}
+\lstick{$\ket{\psi}$} & \ctrl{3} & \ctrl{6} & \gate{H} & \qw & \ctrl{1} & \ctrl{2} & \qw \\
+\lstick{$\ket{0}$}    &          &          &          & \qw & \targ{}  & \qw      & \qw \\
+\lstick{$\ket{0}$}    &          &          &          & \qw & \qw      & \targ{}  & \qw \\
+\lstick{$\ket{0}$}    & \targ{}  & \qw      & \gate{H} & \qw & \ctrl{1} & \ctrl{2} & \qw \\
+\lstick{$\ket{0}$}    &          &          &          & \qw & \targ{}  & \qw      & \qw \\
+\lstick{$\ket{0}$}    &          &          &          & \qw & \qw      & \targ{}  & \qw \\
+\lstick{$\ket{0}$}    & \qw      & \targ{}  & \gate{H} & \qw & \ctrl{1} & \ctrl{2} & \qw \\
+\lstick{$\ket{0}$}    &          &          &          & \qw & \targ{}  & \qw      & \qw \\
+\lstick{$\ket{0}$}    &          &          &          & \qw & \qw      & \targ{}  & \qw
+\end{quantikz}
+\caption{Shor Code circuit}
+\end{figure}
+
+The syndrome measurment is perfomed in an analogous way. We first compare the first two qubits by applying the operator $Z_1 Z_2$, then we continue comparing each pair of neighboring qubits by applying the corresponding operators. We can detect the bit-flip errors on any of the qubit. In order to detect phase-flip errors, we compare the signs of each of the three-qubits blocks. \\
+
+The Shor code allows us to detect bit-flip and phase-flip errors. In order to illustrate that this condition is enough to detect an arbitrary error, we will describe the noise by a trace-preserving operation $\mathcal{E}$. Given $\rho$ the density matrix of the system, the noise acting on the state can be expressed as:
+
+\begin{align*}
+    \mathcal{E}(\rho) = \sum_k E_k \rho E_k^\dagger
+\end{align*}
+
+This is called Kraus operator-sum representation, and will be discussed in more detail. The operators $E_k$ can be expanded as a linear combination of the Pauli matrices $E_k = e_{i0} I + e_{i1} X_1 + e_{i2} Z_1 + e_{i3} X_1 Z_1$. The resulting quantum state $E_k \ket{ \psi }$ can be expressed as a superposition of $\ket{\psi}$, $X_1 \ket{\psi}$, $Z_1 \ket{\psi}$, and $X_1 Z_1 \ket{\psi}$. When we measure the error syndrome, the system collapses to any of the four states, and after applying the necessary correction operation, we obtain the final state $\ket{\Psi}$. \\
+\end{document}
