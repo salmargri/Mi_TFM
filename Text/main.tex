@@ -1,7 +1,7 @@
 % !TeX root = main.tex
 \documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage[spanish]{babel}
+\usepackage[english]{babel}
 \usepackage[style=numeric, backend=biber]{biblatex}
 \addbibresource{referencias.bib}
 \usepackage{amsmath, amssymb,}
@@ -13,9 +13,9 @@
 \usepackage{tikz-cd}
 \usetikzlibrary{quantikz2}
 
-\newtheorem{theorem}{Teorema}
-\newtheorem{proposition}{Proposición} 
-\newtheorem{definition}[proposition]{Definición}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition} 
+\newtheorem{definition}[proposition]{Definition}
 
 \begin{document}
 
@@ -67,9 +67,103 @@ The syndrome measurment is perfomed in an analogous way. We first compare the fi
 
 The Shor code allows us to detect bit-flip and phase-flip errors. In order to illustrate that this condition is enough to detect an arbitrary error, we will describe the noise by a trace-preserving operation $\mathcal{E}$. Given $\rho$ the density matrix of the system, the noise acting on the state can be expressed as:
 
-\begin{align*}
+\begin{equation} \label{Kraus}
     \mathcal{E}(\rho) = \sum_k E_k \rho E_k^\dagger
-\end{align*}
+\end{equation}
 
 This is called Kraus operator-sum representation, and will be discussed in more detail. The operators $E_k$ can be expanded as a linear combination of the Pauli matrices $E_k = e_{i0} I + e_{i1} X_1 + e_{i2} Z_1 + e_{i3} X_1 Z_1$. The resulting quantum state $E_k \ket{ \psi }$ can be expressed as a superposition of $\ket{\psi}$, $X_1 \ket{\psi}$, $Z_1 \ket{\psi}$, and $X_1 Z_1 \ket{\psi}$. When we measure the error syndrome, the system collapses to any of the four states, and after applying the necessary correction operation, we obtain the final state $\ket{\Psi}$. \\
+
+\subsection{General Theory of Quantum Error Correction}
+
+Once we have built some intuition about QEC, we can construct a more general theory. \\
+
+Firstly, we need to give a mathematical description of our noise $\mathcal{E}$. Physically, noise represents an interaction between the system and the enviroment. Since we do not have access to the enviroment, the action of noise on the system appears to be a non-unitary operation, and we cannot describe our qubit as if it was in a pure state. This forces us to use the density matrix 
+
+\begin{equation} \label{density}
+    \rho = \sum_i p_i \ket{ \psi_i } \bra{ \psi_i }
+\end{equation}
+
+that represents the mixture of different pure states $\ket{ \psi_i }$ with probabilities $p_i$. This must be a semi-positive-definite Hermitian matrix, with unit trace and non-negative eigenvalues. Non-unitary noise operations must preserve these properties. Hence, we represent noise acting on a system as a transformation of the state described by the densitythat fulfill this condition: a Completely Positive Trace Preserving (CPTP) map. In the Kraus representation, the action of a CPTP map $\mathcal{E}$ on a density matrix $\rho$ is given by the formula \ref{Kraus}, where the Kraus operators $E_k$ satisfy the condition $\sum_k E_k^\dagger E_k = I$ (this condition derives necessarily from the requirement of trace preservation). If we consider any state $\ket{\psi}$ in the Hilbert space and consider the set of error-affected states $ \ket{\psi _k} = E_k^\dagger \ket{\psi} $, we can easily chech that: \\
+
+\begin{align*}
+    \sum_k \bra{\psi} E_k \rho E_k^\dagger \ket{\psi} = \sum_k \bra{\psi_k} \rho \ket{\psi_k} \geq 0
+\end{align*}
+
+which verifies that the map is completely positive. We will call the operation elements $\{E_i\}$ errors, and they represent the transformation of the quantum state under Hamiltonian parameter deviations from their ideal values. \\
+
+Now we want to generalize the basic ideas present in the Shor code to give a simple picture of how we can detect and correct errors in a quantum system. We firstly define a quantum error-correcting code as a subspace $C$ of the total Hilbert space. We encode our quantum states by projecting them into $C$ by an unitary operation $P$ that we will call the projector. The enconded system is then vulnerable to enviromental noise, which we model as a CPTP map $\mathcal{E}$. We perform a syndrome measurement to determine the error that has affected the system, and a recovery operation $\mathcal{R}$ returns the system to its original encoded state. \\
+
+When we project our state into the code subspace, we are essentially restricting the degrees of freedom of the system. This means that if our original Hilbert space for $n$ physical qubits is $2^n$-dimensional, the code subspace will be $2^k$-dimensional, where $k < n$. We are encoding $k$ logical qubits into $n$ physical qubits. Once the noise acts on the encoded state $\ket{\psi_L}$, the system will be pushed into a different subspace. Specifically, each error $E_\alpha$ projects the state into an error subspace $C_\alpha = E_\alpha C$. Each error subspace has its corresponding projector $P_\alpha = E_\alpha P E_\alpha^\dagger$. \\
+
+If, given a code, each error corresponds to different undeformed and orthogonal subspaces, then we can reliably distinguish which error has occurred. This will be achieved by performing the set of projective measurements associated with each error subspace. Given our noisy state $E_\alpha \ket{\psi_L}$, the execution of a projector $P_\beta$ will yield us a syndrome lecture $\beta$ with probability $p_\beta = \bra{\psi_L} E_\alpha^\dagger P_\beta E_\alpha \ket{\psi_L}$. The orthogonality of error subspaces ensures that the measurement associated to an error subspace $C_\beta$ will only yield a non-zero probability when the corresponding error has occurred. \\
+
+The undeformed condition means that, if you have two perfectly distinguishable (orthogonal) states $\ket{\psi_L}$ and $\ket{\phi_L}$ in the code subspace, then the error $E_\alpha$ must not make them non orthogonal. This is equivalent to saying that the inner product of the two states must be preserved under the action of the error, that is, $\bra{\psi_L} E_\alpha^\dagger E_\alpha \ket{\phi_L} = \bra{\psi_L} \ket{\phi_L} = 0$. This ensures that the recovery operation can correctly restore the original encoded state. \\
+
+We can define the condition for an error correction code to be able to correct the effect of noise as follows: Given a code C, a noisy quantum channel characterized by $\mathcal{E}$, and any state $\ket{\psi_L}$, with density matrix $\rho_L$, the error correction is successful if \\
+
+\begin{equation} \label{QECgeneral}
+    ( \mathcal{R} \circ \mathcal{E} ) (\rho) \propto \rho
+\end{equation}
+
+In this condition, and in the following equation, we have not imposed the trace-preserving condition for $\mathcal{E}$, with the idea of allowing for more general noise models. That is the reason we use the proportionality symbol $\propto$. The prior discussion can be summarized in a very compact algebraic expression, the Knill-Laflamme condition for quantum error correction:
+
+\begin{theorem}[Knill-Laflamme] \label{Knill-Laflamme}
+Let $C$ be a quantum error-correcting code, $P$ the projector onto C, and $\mathcal{E}$ a CPTP map with operation elements $\{E_i\}$. Then, there exists a recovery operation $\mathcal{R}$ such that $(\mathcal{R} \circ \mathcal{E})(\rho) = \rho$ for all $\rho$ supported on $C$ if and only if the following condition holds:
+\begin{equation} \label{KL}
+    P E_i^\dagger E_j P = \alpha_{ij} P
+\end{equation}
+for some Hermitian matrix $\alpha_{ij}$.
+\end{theorem}
+
+\begin{proof}
+    ($\Leftarrow$) We notice that the Hermitian matrix $\alpha_{ij}$ can be diagonalized by a unitary transformation $u$, such that $u \alpha u^\dagger = d$, where $d$ is a diagonal matrix. We can define new operation elements $F_i = \sum_j u_{ij} E_j$. Those can be proven to be operation elements of $\mathcal{E}$. The new operation elements also satisfy the Knill-Laflamme condition, since:
+\begin{align*}
+    P F_i^\dagger F_j P &= \sum_{k,l} u_{ki}^\dagger u_{jl} P E_k^\dagger E_l P \\
+    &= \sum_{k,l} u_{ki}^\dagger u_{jl} \alpha_{kl} P \\
+    &= d_{kl} P \\
+\end{align*}
+
+which simplifies the Knill-Laflamme condition, since $d_{kl}$ is a diagonal matrix. This diagonalization makes it explicit that the error subspaces are orthogonal. We decompose the operation elements as $F_i P = \sqrt{d_{ii}} U_i P$, where $U_i$ is a unitary operator and $\sqrt{d_{ii}}$ is a positive real number.\\
+
+$F_i$ maps the code subspace $C$ to the error subspace defined by the projector $P_i = U_i P U_i^\dagger = F_i P U_i^\dagger / \sqrt{d_{ii}}$. As we have already discussed, the syndrome measurement is the projective measurement defined by the projectors $P_i$. The recovery operation $\mathcal{R}$ is defined as $\mathcal{R}(\rho) = \sum_k U_i^\dagger P_i \rho P_i U_i$. For any state $\rho$ supported on $C$, we can show that:
+\begin{align*}
+    U_i^\dagger P_i F_k \sqrt{\rho} &=  U_i^\dagger P_i^\dagger F_j P \sqrt{\rho} \\
+    &= \frac{U_i^\dagger U_i P F_i^\dagger F_j P \sqrt{\rho}}{\sqrt{d_{ii}}} \\
+    &= \delta_{ij} \sqrt{d_{ij}} \sqrt{\rho}
+\end{align*}
+
+Thus, one can easily check that this recovery operation satisfies the error correction condition:
+
+\begin{align*}
+    (\mathcal{R} \circ \mathcal{E})(\rho) &= \sum_{i,j} U_i^\dagger P_i F_j \rho F_j^\dagger P_i U_i \\
+    &= \sum_{i,j} \delta_{ij} d_{ii} \rho \propto \rho
+\end{align*}
+($\Rightarrow$) Assume $\{ E_i \}$ are errors correctable by $\mathcal{R}$, with operation elements $\{ R_j \}$. We define a quantum operation $\mathcal{E}_C$ by $\mathcal{E}_C(\rho) =  \mathcal{E}(P \rho P) $. $P \rho P \in C$ for any $\rho$, so we can apply the error correction condition to obtain:
+\begin{align*}
+    \mathcal{R} ( \mathcal{E}_C(\rho) ) \propto P \rho P
+\end{align*}
+We can rewrite the left-hand side of this equation as:
+\begin{align*}
+    \mathcal{R} ( \mathcal{E}_C(\rho) ) &= \sum_{i,j} R_j E_i P \rho P E_i^\dagger R_j^\dagger
+\end{align*}
+
+Thus
+
+\begin{align*}
+    \sum_{i,j} R_j E_i P \rho P E_i^\dagger R_j^\dagger = c P \rho P
+\end{align*}
+
+for some constant $c$. The quantum operation with operation elements $\{ R_j E_i \} $ is identical to the quantum operation with only one operation element $\sqrt{c} P$. This implies that there exist a complex matrix with entries $c_{ki}$ such that $R_k E_i P = c_{ki} P$. We take the adjoint and obtain $P E_i^\dagger R_k^\dagger R_k E_j P= c_{ki}^* c_{kj} P$. Since $\mathcal{R}$ is a CPTP map, we have $ \sum _k R_k^\dagger R_k = I$. Thus, we can sum over $k$ to obtain:
+\begin{align*}
+    P E_i^\dagger E_j P = \alpha_{ij} P
+\end{align*}
+
+Which is the Knill-Laflamme condition, with $\alpha_{ij} = \sum_k c_{ki}^* c_{kj}$.
+    
+\end{proof}
+
+The proof of the Knill-Laflamme condition explicitly provides a method to construct the recovery operation $\mathcal{R}$, given the code subspace and the noise model. However, a quantum system could be affected by a noise process that is not known. It would be desirable to have a code $C$ and an error-correction operation $\mathcal{R}$ that can correct the effect of an entire class of noise processes. That is indeed possible, and it is a consequence of the linearity of quantum mechanics. If we have a code that can correct the effect of a set of errors $\{ E_i \}$, then it can also correct the effect of any error that can be expressed as a linear combination of those errors. This is a direct consequence of theorem \ref{Knill-Laflamme}, since if $C$ satisfies the Knill-Laflamme condition for $\{ E_i \}$, then it also satisfies it for any linear combination of those errors. \\
+
+
+
 \end{document}

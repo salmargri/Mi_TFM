@@ -1,5 +1,0 @@
-[0] Config.pm:328> INFO - This is Biber 2.21
-[0] Config.pm:331> INFO - Logfile is 'main.blg'
-[132] biber-MSWIN64:342> INFO - === 
-[542] Utils.pm:479> ERROR - Cannot find control file 'main.bcf'! - Did latex run successfully on your .tex file before you ran biber?
-[542] Biber.pm:137> INFO - ERRORS: 1
