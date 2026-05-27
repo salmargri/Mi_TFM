@@ -23,6 +23,8 @@
 
 The main challenge of quantum computation is the fragility of the physical systems that are used to implement the qubits. In classical computation, information is encoded in macroscopic physical variables, and the logical states are separated by energy barriers that make them robust against enviromental fluctuations. Compared to classical bits, qubits are heavily affected by enviromental noise, which makes them degrade and lose their information due to decoherence. It is thus necessary to explore the most efficient ways to protect quantum information while maintaining the practical feasibility of operating with those protected qubits. \\
 
+\subsection{Overview and Simple Codes}
+
 Fathoming the differences between classical and quantum error-corecting codes makes it necessary to pay attention to three difficulties that arise when we deal with quantum systems: The no-cloning theorem,, which prevents us from duplicating the state of a qubit; the continuous nature of errors; and the fact that observation in quantum mechanics collapses the wave function in one of the eigenstates of the measured observable (this is a non-unitary process, and thus recovery is impossible) \\  
 
 In order to overcome these difficulties, quantum error-correcting codes (QECC) utilze entanglement to encode a logical qubit across a multi-qubit system. This way, we can protect the quantum information via redundancy, without violating the no-cloning theorem. QEC protocols measure multi-qubit parity operators (error syndromes), avoiding the collapse of the wave function. The continuity problem will be confronted by discretizing the errors into a finite set of Pauli operations.\\
@@ -91,7 +93,7 @@ that represents the mixture of different pure states $\ket{ \psi_i }$ with proba
 
 which verifies that the map is completely positive. We will call the operation elements $\{E_i\}$ errors, and they represent the transformation of the quantum state under Hamiltonian parameter deviations from their ideal values. \\
 
-Now we want to generalize the basic ideas present in the Shor code to give a simple picture of how we can detect and correct errors in a quantum system. We firstly define a quantum error-correcting code as a subspace $C$ of the total Hilbert space. We encode our quantum states by projecting them into $C$ by an unitary operation $P$ that we will call the projector. The enconded system is then vulnerable to enviromental noise, which we model as a CPTP map $\mathcal{E}$. We perform a syndrome measurement to determine the error that has affected the system, and a recovery operation $\mathcal{R}$ returns the system to its original encoded state. \\
+Now we want to generalize the basic ideas present in the Shor code to give a simple picture of how we can detect and correct errors in a quantum system. We firstly define a quantum error-correcting code as a subspace $C$ of the total Hilbert space, and the elements of $C$ will be called codewords. We encode our quantum states by projecting them into $C$ by an unitary operation $P$ that we will call the projector. The enconded system is then vulnerable to enviromental noise, which we model as a CPTP map $\mathcal{E}$. We perform a syndrome measurement to determine the error that has affected the system, and a recovery operation $\mathcal{R}$ returns the system to its original encoded state. \\
 
 When we project our state into the code subspace, we are essentially restricting the degrees of freedom of the system. This means that if our original Hilbert space for $n$ physical qubits is $2^n$-dimensional, the code subspace will be $2^k$-dimensional, where $k < n$. We are encoding $k$ logical qubits into $n$ physical qubits. Once the noise acts on the encoded state $\ket{\psi_L}$, the system will be pushed into a different subspace. Specifically, each error $E_\alpha$ projects the state into an error subspace $C_\alpha = E_\alpha C$. Each error subspace has its corresponding projector $P_\alpha = E_\alpha P E_\alpha^\dagger$. \\
 
@@ -164,6 +166,89 @@ Which is the Knill-Laflamme condition, with $\alpha_{ij} = \sum_k c_{ki}^* c_{kj
 
 The proof of the Knill-Laflamme condition explicitly provides a method to construct the recovery operation $\mathcal{R}$, given the code subspace and the noise model. However, a quantum system could be affected by a noise process that is not known. It would be desirable to have a code $C$ and an error-correction operation $\mathcal{R}$ that can correct the effect of an entire class of noise processes. That is indeed possible, and it is a consequence of the linearity of quantum mechanics. If we have a code that can correct the effect of a set of errors $\{ E_i \}$, then it can also correct the effect of any error that can be expressed as a linear combination of those errors. This is a direct consequence of theorem \ref{Knill-Laflamme}, since if $C$ satisfies the Knill-Laflamme condition for $\{ E_i \}$, then it also satisfies it for any linear combination of those errors. \\
 
+\subsection{Stabilizer Codes}
 
+The previous discussion has proven the theoretical possibility of quantum error correction. However, the state-vector representation of quantum states carries a practical impossibility. When we have a a large number $n$ of physical qubits, the manipulation of the $2^n$-dimensional state vector becomes unfeasible. We need a more efficient way to represent quantum states, and the stabilizer formalism provides us with such a tool. \\
+
+\subsubsection{Stabilizer Formalism}
+
+If we take a closer look at the Shor code, and specifically at the syndrome measurement, we can see that in order to detect a bit flip on one of the first three qubits, we measured the eigenvalues of the operators $Z_1 Z_2$ and $Z_2 Z_3$. The same procedure should be performed for the other two blocks of three qubits. In order to detect phase-flip errors, we need to measure the eigenvalues of the operators $X_1 X_2 X_3 X_4 X_5 X_6$ and $X_4 X_5 X_6 X_7 X_8 X_9$. In total, we need to measure the eigenvalues of eight operators.The two valid codewords, $\ket{0_L}$ and $\ket{1_L}$, are the eigenstates of all these operators with eigenvalue +1, and hence are simulatenously fixed by any of them. Those are called stabilizer operators, and the basic idea of the formalism is to describe the code space as the subspace stabilized by these operators. \\
+
+In order to give a more precise description of the stabilizer formalism, let's introduce the $n$-dimensional Pauli group $\mathcal{P}_n$, which is the group generated by the $n$-fold tensor products of the Pauli matrices and the identity, together with the multiplicative factors $\pm 1$ and $\pm i$. For instance, the 1-dimensional Pauli group is \\
+
+\begin{align*}
+    \mathcal{P}_1 = \{ \pm I, \pm X, \pm Y, \pm Z, \pm iI, \pm iX, \pm iY, \pm iZ  \}
+\end{align*}
+
+It is easily verifiable that $\mathcal{P}_n$ is a group under matrix multiplication. The stabilizer is some Abelian subgroup $\mathcal{S} \subseteq \mathcal{P}_n$ that does not contain $-I$, and the vectors fixed by all elements of $\mathcal{S}$ form the code space $C$, i.e.:\\
+\begin{align*}
+    C \equiv \{ \ket{\psi} \in \mathcal{H} : g \ket{\psi} = \ket{\psi}; \ \forall g \in \mathcal{S} \}
+\end{align*}
+
+It is also obvious that the code space $C$ is indeed a vector space. $\mathcal{S}$ is necessarily an Abelian subgroup, since two non-conmuting operators cannot have common eigenstates. \\
+
+Let's recall that our aim is to define a subspace $C$ of the total Hilbert space, such that it encodes $k$ logical qubits into $n$ physical qubits. Therefore, the dimension of $C$ must be $2^k$. We want to see how this condition translates on the definition of the stabilizer $\mathcal{S}$:
+
+\begin{proposition}
+If $\mathcal{S}$ is an Abelian subgroup of $\mathcal{P}_n$ that does not contain $-I$, then the code space $C$ stabilized by $\mathcal{S}$ has dimension $2^{n - k}$, where $k$ is the number of independent generators of $\mathcal{S}$.
+\end{proposition}
+\begin{proof}
+Let $\mathcal{S}$ be generated by $\langle g_1, g_2, \ldots, g_k \rangle$. Since all the generators are elements of $\mathcal{P}_n$, they are unitary and Hermitian, and thus have eigenvalues $\pm 1$. We can project the total Hilbert space into the +1 eigenspace of each generator $g_i$ by applying the projector
+\begin{align*}
+    P_i = \frac{I + g_i}{2} 
+\end{align*}
+The code space $C$ is the subspace stabilized by all the generators, and thus can be obtained by applying the projectors associated with each generator to the total Hilbert space:
+\begin{align*}
+    P_C = \prod_{i=1}^k P_i = \prod_{i=1}^k \frac{I + g_i}{2} 
+\end{align*}
+
+If we expand the product, we sum over all possible products of the generators $g_i$, which yields the $2^k$ elements of $\mathcal{S}$.
+
+\begin{align*}
+    P_C = \frac{1}{2^k} \sum_{g \in \mathcal{S}} g    
+\end{align*}
+
+The dimension of the code space $C$ is given by the trace of the projector $P_C$:
+\begin{align*}
+    \text{dim}(C) = \text{Tr}(P_C) = \frac{1}{2^k} \sum_{g \in \mathcal{S}} \text{Tr}(g)
+\end{align*}
+
+We have the following cases for the trace of an element $g \in \mathcal{S}$:
+\begin{itemize}
+    \item If $g = I^{\otimes n}$, then $\text{Tr}(g) = 2^n$.
+    \item If $g \neq I^{\otimes n}$, then $g$ is a non-trivial element of $\mathcal{P}_n$, and thus has trace zero, since it contains at least one Pauli matrix that has zero trace.
+\end{itemize}
+
+$-I \notin \mathcal{S}$ ensures that there are no elements of $\mathcal{S}$ with trace $-2^n$. Thus, the only element of $\mathcal{S}$ with non-zero trace is the identity, and we have:
+\begin{align*}
+    \text{dim}(C) = \text{Tr}(P_C) = \frac{1}{2^k} \cdot 2^n = 2^{n-k}
+\end{align*}
+\end{proof}
+
+Therefore, a code that encodes $k$ logical qubits into $n$ physical qubits can be defined by a stabilizer $\mathcal{S}$ with $n-k$ independent generators. This proposition also provides a reason for the non-inclusion of $-I$ in the stabilizer. This is nonetheless obvious from the fact that the only solution to $-I\ket{\psi} = \ket{\psi}$ is the trivial solution $\ket{\psi} = 0$.\\
+
+We have discussed the description of a subspace using stabilizer formalism. Now let's see how we can describe the dynamics of those subspaces under the action of noise and other quantum processes. Let $\ket{\psi}$ be an element of a code space $C$ stabilized by $\mathcal{S}$. If we apply an unitary operation $U$,
+\begin{align*}
+    U \ket{\psi} = U g \ket{\psi} = (U g U^\dagger) U \ket{\psi}
+\end{align*}
+and we see that $U \ket{\psi}$ is stabilized by the conjugated operator $U g U^\dagger$. Since this is common to any element of $C$, we can easily see that $U C$ is stabilized by $USU^\dagger \equiv \{ U g U^\dagger : g \in \mathcal{S} \} $. This property does not ensure that any stabilizer of a subspace $UC$ is a valid stabilizer, since the conjugation by $U$ might introduce elements that are not in $\mathcal{P}_n$. We hence introduce the Clifford group $\mathcal{C}_n$ as the stabilizer of the Pauli group:\\
+\begin{align*}
+    \mathcal{C}_n \equiv \{ U : U \mathcal{P}_n U^\dagger = \mathcal{P}_n \}
+\end{align*}
+
+The Clifford group is the largest group of unitary operations that preserve the Pauli group under conjugation. If we apply an operation $U \in \mathcal{C}_n$ to a code space $C$ stabilized by $\mathcal{S}$, the resulting subspace $UC$ is stabilized by $USU^\dagger \in \mathcal{P}_n$. Conjugation by a Clifford operation also preserves the commutation relations
+
+\begin{align*}
+    U g_1 U^\dagger U g_2 U^\dagger = U g_1 g_2 U^\dagger = U g_2 g_1 U^\dagger = U g_2 U^\dagger U g_1 U^\dagger
+\end{align*}
+
+which ensures that the resulting stabilizer $USU^\dagger$ is also an Abelian subgroup of $\mathcal{P}_n$. If $-I$ was in $U \mathcal{S} U^\dagger$, then there would be some $g \in \mathcal{S}$ such that $U g U^\dagger = -I$, and therefore:\\
+
+\begin{centering}
+    $ U^\dagger ( U g U^\dagger ) U = U^\dagger (-I)  U $ \\
+    $ g = -I $ \\
+\end{centering}
+
+which contradicts the definition of stabilizer. Thus, $-I$ is not in $U \mathcal{S} U^\dagger$, and the resulting subspace $UC$ is a valid code space stabilized by $USU^\dagger$.\\
 
 \end{document}
