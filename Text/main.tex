@@ -98,7 +98,7 @@ We can define the condition for an error correction code to be able to correct t
     ( \mathcal{R} \circ \mathcal{E} ) (\rho) \propto \rho
 \end{equation}
 
-In this condition, and in the following equation, we have not imposed the trace-preserving condition for $\mathcal{E}$, with the idea of allowing for more general noise models. That is the reason we use the proportionality symbol $\propto$. The prior discussion can be summarized in a very compact algebraic expression, the Knill-Laflamme condition for quantum error correction:
+In this condition, and in the following equation, we have not imposed the trace-preserving condition for $\mathcal{E}$, with the idea of allowing for more general noise models. That is the reason we use the proportionality symbol $\propto$. The prior discussion can be summarized in a very compact algebraic expression, the Knill-Laflamme condition for quantum error correction \cite{Knill_2000}:
 
 \begin{theorem}[Knill-Laflamme] \label{Knill-Laflamme}
 Let $C$ be a quantum error-correcting code, $P$ the projector onto C, and $\mathcal{E}$ a CPTP map with operation elements $\{E_i\}$. Then, there exists a recovery operation $\mathcal{R}$ such that $(\mathcal{R} \circ \mathcal{E})(\rho) = \rho$ for all $\rho$ supported on $C$ if and only if the following condition holds:
@@ -221,9 +221,9 @@ Therefore, a code that encodes $k$ logical qubits into $n$ physical qubits can b
 \subsubsection{Unitary Dynamics of Stabilizer Codes and the Gottessman-Knill Theorem}
 
 We have discussed the description of a subspace using stabilizer formalism. Now let's see how we can describe the dynamics of those subspaces under the action of noise and other quantum processes. Let $\ket{\psi}$ be an element of a code space $C(\mathcal{S})$ stabilized by $\mathcal{S}$. If we apply a unitary operation $U$,
-\begin{align*}
+\begin{align}
     U \ket{\psi} = U g \ket{\psi} = (U g U^\dagger) U \ket{\psi}
-\end{align*}
+\end{align}
 and we see that $U \ket{\psi}$ is stabilized by the conjugated operator $U g U^\dagger$. Since this is common to any element of $C(\mathcal{S})$, we can easily see that $U C(\mathcal{S})$ is stabilized by $USU^\dagger \equiv \{ U g U^\dagger : g \in \mathcal{S} \} $. This property does not ensure that any stabilizer of a subspace $U C(\mathcal{S})$ is a valid stabilizer, since the conjugation by $U$ might introduce elements that are not in $\mathcal{P}_n$. We hence introduce the Clifford group $\mathcal{C}_n$ as the normalizer of the Pauli group:\\
 \begin{align*}
     \mathcal{C}_n \equiv \{ U : U \mathcal{P}_n U^\dagger = \mathcal{P}_n \}
@@ -277,6 +277,8 @@ However, not all errors can be successfully corrected. If an error $E$ commutes 
 
 Therefore, undetectable and uncorrectable logical errors are exactly those in $N(\mathcal{S}) \setminus \mathcal{S}$. The minimum weight (defined as the number of non-identity tensor factors in the Pauli string) of an operator in $N(\mathcal{S}) \setminus \mathcal{S}$ defines the distance $d$ of the code. Such a code is usually denoted by the parameters $[n, k, d]$, meaning it encodes $k$ logical qubits into $n$ physical qubits and can correct any arbitrary error affecting up to $\lfloor (d-1)/2 \rfloor$ physical qubits. \\
 
+We can build a deeper structural understanding of the code by considering the logical characterisation of errors instead of just tracking them as a raw collection of physical errors. This means that we can find different elements of $N(\mathcal{S}) \setminus \mathcal{S}$ that act on the encoded states in the same way. Specifically, for any given error $E \in N(\mathcal{S}) \setminus \mathcal{S}$, we can find an element $g \in \mathcal{S}$ such that $E g \in N(\mathcal{S}) \setminus \mathcal{S}$, and $E g \ket{\psi_L} = E \ket{\psi_L}$ for any $\ket{\psi_L} \in C(\mathcal{S})$. This means that we could build a group of logical operators where different physical errors differing only by elements of $\mathcal{S}$ are identified in the same class of equivalence. This is obviously the definition of the quotient group $N(\mathcal{S}) / \mathcal{S}$. The elements of this group are also the valid logical operators of the code, as they are the only operators that act non-trivially on the encoded states without pushing them out of the code space.
+
 \subsection{Fault-Tolerant Quantum Computation}
 
 We have discussed how encoding quantum information into a subspace can protect the data from environmental noise. However, the very process of encoding, syndrome measurement, as well as the application of logical quantum gates can also be affected by noise. The fundamental idea of fault-tolerant quantum computation is to design these processes in such a way that they do not propagate errors uncontrollably, and that the error correction procedure can still successfully correct the errors that occur during these operations. \\
@@ -302,12 +304,12 @@ We are interested in a specific family of stabilizer codes, namely surface codes
 Let's consider a connected, closed, orientable surface of genus g, and define a lattice on it, with $V$ vertices. $E$ edges and $F$ faces. We will call 0-cells the vertices of the lattice, 1-cells the edges, and 2-cells the faces. \\
 
 We want to obtain the homology groups of this surface over $\mathbb{Z}_2$. For this purpose, we construct an abelian group for each dimension $i \in \{0, 1, 2\}$, generated by the sets of $i$-cells, where the field of coefficients is $\mathbb{Z}_2$. In this sense, if we consider a set of 1-cells $E = \{ e_1, e_2, \ldots, e_m \}$, we can represent it as a sum \\
-\begin{align*}
+\begin{align}
     c = \sum_{i} c_i e_i \hspace{1cm} c_i = \begin{cases} 
 0 & e_i \notin E \\ 
 1 & e_i \in E 
 \end{cases}.
-\end{align*}
+\end{align}
 
 Such sums are called 1-chain. We can consider addition of 1-chains (taking into account that the coefficients are in $\mathbb{Z}_2$ and hence $e_i + e_i = 0$), obtaining an abelian group structure on the set of 1-chains $C_1$. The elements of $C_1$ can be considered as binary vectors of length $E$, and topologically $C_1 \simeq \mathbb{Z}_2^E$. Equivalently, we define the group of 0-chains $C_0 \simeq \mathbb{Z}_2^V$ as the abelian group generated by the sets of 0-cells, and the group of 2-chains $C_2 \simeq \mathbb{Z}_2^F$ using the exact same procedure for 2-cells. \\
 
@@ -322,27 +324,31 @@ The boundary operators satisfy the property that they are nilpotent of degree 2,
 From these boundary operators, we construct two subgroups of $C_i$. The group of $i$-cycles $Z_i$ is defined as the kernel of $\partial_i$, that is, the set of $i$-chains that have an empty boundary. The group of $i$-boundaries $B_i$ is defined as the image of $\partial_{i+1}$, that is, the set of $i$-chains that are the boundary of some $(i+1)$-chain. Since $\partial_i \circ \partial_{i+1} = 0$, we have that $B_i \subseteq Z_i$. \\
 
 We can define the $i$-th homology group as the algebraic quotient group of $i$-cycles by $i$-boundaries:
-\begin{align*}
+\begin{align}
     H_i = \frac{Z_i}{B_i}
-\end{align*}
+\end{align}
 where the quotient group is defined as the set of equivalence classes of $i$-cycles, where two $i$-cycles are equivalent if they differ by a $i$-boundary, that is, the elements of $H_i$ are of the form $[z] = \{ z + b : b \in B_i \}$, where $z$ is any $i$-cycle. The homology groups are topological invariants, meaning that they do not depend on the specific lattice we have defined on the surface, but only on the topology of the surface itself. For a connected, closed, orientable surface of genus $g$, we have that $H_0 \simeq \mathbb{Z}_2$, $H_1 \simeq \mathbb{Z}_2^{2g}$ and $H_2 \simeq \mathbb{Z}_2$. \\
+
+
 
 \subsection{Surface Codes}
 
 Consider a lattice embedded in a closed surface, and attach a qubit to each edge. It is natural to see elements of the computational basis as 1-chains $c \in C_1$
-\begin{align*}
+\begin{align}
     \ket{c} = \bigotimes_i \ket{c_i} 
-\end{align*}
+\end{align}
 
 It is useful to define groups homeomorphism from $C_1$ to the group of Pauli operators $\mathcal{P}_n$, where $n$ is the number of edges in the lattice and hence the number of physical qubits. We can define two homomorphisms, $X: C_1 \rightarrow \mathcal{P}_n$ and $Z: C_1 \rightarrow \mathcal{P}_n$, such that 
-\begin{align*}
+\begin{align}
     X_c = \bigotimes_i X^{c_i}_i \quad \text{and} \quad Z_c = \bigotimes_i Z^{c_i}_i.
-\end{align*}
+\end{align}
 
 Given these homomorphisms, we can define the face and vertex operators as follows:
-\begin{align*}
+\begin{align}
 X_f:= \prod _{e \in \partial_2 f} X_e \quad \text{and} \quad Z_v := \prod _{e |v \in \partial_1 e} Z_e
-\end{align*}
+\end{align}
+
+Those operators are ilustrated in figure \ref{fig:surface_code}, giving a clear intuition of their geometric meaning. The face and vertex operators commute with each other, and hence we can consider a stabilizer group $\mathcal{S}$ generated by them. In order to see the code subspace stabilized by $\mathcal{S}$, we can apply the projectors associated with each generator to any state of the total Hilbert space $\ket{c}$, $c \in C_1$:
 
 \begin{figure}
 \centering
@@ -350,8 +356,6 @@ X_f:= \prod _{e \in \partial_2 f} X_e \quad \text{and} \quad Z_v := \prod _{e |v
 \caption{Lattice showing the arrangement of physical qubits and the support of the stabilizer generators.}
 \label{fig:surface_code}
 \end{figure}
-
-Those operators are ilustrated in figure \ref{fig:surface_code}, giving a clear intuition of their geometric meaning. The face and vertex operators commute with each other, and hence we can consider a stabilizer group $\mathcal{S}$ generated by them. In order to see the code subspace stabilized by $\mathcal{S}$, we can apply the projectors associated with each generator to any state of the total Hilbert space $\ket{c}$, $c \in C_1$:
 
 \begin{align*}
     \prod_{f} \frac{I + X_f}{2} \prod_{v} \frac{I + Z_v}{2} \ket{c} \\
@@ -383,9 +387,45 @@ We notice that $\sum_i f_i$ is a 2-chain, and thus $\partial_2 (\sum_i f_i)$ is 
 \end{align*}
 
 Applying this to our cycle state $\ket{z}$ yields:
-\begin{align*}
+\begin{align}
     \prod_f \frac{1+X_f}{2} \ket{z} &\propto \sum_{b \in B_1} X_b \ket{z} = \sum_{b \in B_1} \ket{z + b}
-\end{align*}
+\end{align}
 
 This means that the states associated with two different cycles differing by a boundary are projected to the same state, and hence the code subspace stabilized by $\mathcal{S}$ is the vector space generated by the states $\ket{[z]} = \sum_{b \in B_1} \ket{z + b}$, where $[z]$ is the equivalence class of $z$ in $H_1$. Since $H_1 \simeq \mathbb{Z}_2^{2g}$, we have that the code subspace has dimension $2^{2g}$, and hence encodes $k=2g$ logical qubits into $n$ physical qubits. \\
+
+Now, let's consider the effects of bit-flip and phase-flip errors on the code subspace. We can model bit-flip errors as the application of $X$ operators on the elements of a certain 1-chain $c$, so that its action on the physical state is given by $X_c \ket{b} = \ket{b + c}$, and on the encoded state $X_c \ket{[z]} = \ket{[z + c]}$. If the error chain is an open string ($\partial_1 c \neq 0$), then the error kicks the encoded state out of the protected subspace, so it can be easily detected. This means that $X_z$ can map the code back to itself only if $z \in Z_1$. On the other hand, if the error acts on a 1-boundary $b \in B_1$, then the encoded state remains the same as the homology class does not change $X_b \ket{[z]} = \ket{[z]}$. We conclude that the distance of a surface code for bit-flip errors is the length of the shortest non-bounding cycle $z \in Z_1 \setminus B_1$. \\
+
+In order to proceed with the analysis of phase-flip errors, we need to construct the dual lattice. We will map faces to dual vertices $f^*$, edges to dual edges $e^*$ (they represent the same physical qubits) and vertices to dual faces $v^*$. We have the corresponding dual operators $\partial^*_1 : C^*_0 \rightarrow C^*_1$ and $\partial^*_2 : C^*_1 \rightarrow C^*_2$, and they produce the groups of dual cycles $Z^*_1$, dual boundaries $B^*_1$ and the homology group $H^*_1$. We can map the original code subspace to the one defined by the surface code on the dual lattice by applying a Hadamard gate $H^{\otimes E}$ to all physical qubits, giving us the following stabilizers:
+\begin{align}
+    H^{\otimes E} X_f H^{\otimes E} = \prod_{e \in \partial_2 f} Z_e = \prod_{e^* | f^* \in \partial_2^* e^*} Z_e =: Z_{f^*} \\
+H^{\otimes E} Z_v H^{\otimes E} = \prod_{e | v \in \partial_1 e} X_e = \prod_{e^* \in \partial_1^* v^*} X_e =: X_{v^*}.
+\end{align}
+
+We can then treat phase-flip errors as bit-flip errors on the dual lattice, and applying the same reasoning as before, we conclude that the distance of a surface code for phase-flip errors is the length of the shortest non-bounding cycle $z^* \in Z^*_1 \setminus B^*_1$ on the dual lattice. \\
+
+If we recall the discussion on error detection in stabilizer codes, we can establish a clear parallelism between the normalizer and stabilizer groups, and the different 1-chain groups defined on the lattice. Firstly, we notice that we can write any element of the Pauli group $\mathcal{P}_E$ in terms of a pair of chains $c, c^*$, and a phase, as follows:
+\begin{align}
+    A = i^k X_c Z_{c^*}
+\end{align}
+where $k \in \{0, 1, 2, 3\}$ is an integer that depends on the specific element of $\mathcal{P}_E$. We want to find the elements of the normalizer, that is, operators $A$ that commute with all the vertex and face operators. As we have already discussed, the commutation relations are:
+\begin{align}
+    [X_c, S_v] = 0 \iff v \notin \partial_1 c \quad \quad [Z_{c^*}, S_f] = 0 \iff f \notin \partial_2^* c^*
+\end{align}
+This means that the normalizer is given by the set of operators $A = i^k X_c Z_{c^*}$ such that $\partial_1 c = 0$ and $\partial_2^* c^* = 0$, which is equivalent to saying that $c \in Z_1$ and $c^* \in Z^*_1$. The stabilizer is given by the subset of the normalizer where $c \in B_1$ and $c^* \in B^*_1$. Therefore, the logical operators are given by the elements of the normalizer that are not in the stabilizer, which correspond to pairs of cycles that are not boundaries. This is exactly the definition of the homology groups $H_1$ and $H^*_1$, and hence we have that the logical operators of a surface code are in one-to-one correspondence with the homology classes of the lattice and its dual: 
+\begin{align}
+    N(\mathcal{S}) / \mathcal{S} \simeq H_1 \times H^*_1
+\end{align}
+
+Embedding a lattice on a closed surface provides a mathematically elegant way to encode quantum information using local interactions. However, the practical feasibility of arranging physical qubits on a closed surface such as a torus is questionable. However, arbitrarily truncating a closed surface code to a planar geometry destroys the non-trivial homology classes. Bravyi and Kitaev \cite{bravyi1998quantumcodeslatticeboundary} proposed a solution to this problem by introducing the concept of boundaries in surface codes. By carefully designing the boundaries of the lattice, we can preserve the non-trivial homology classes and hence the logical qubits, while still maintaining local interactions between physical qubits. This leads to the well-known planar surface code, which is one of the most promising candidates for practical quantum error correction in near-term quantum devices.\\
+
+This extension of closed surface codes is based on a notion of relative homology \cite{massey1977algebraic}, as presented in \cite{delfosse2016generalizedsurfacecodespacking}. We consider our 2-dimensional surface with a lattice defined by the graph $G=(V,E,F)$ containing boundaries. An edge is a boundary if it is incident to a single face of $G$, and the endpoints of these edges are boundary vertices. \\
+
+We specify a subset of boundary edges and declare it as open, denoted $\partial_O E$. If a vertex is incident to an edge $E \in \partial_O E$, we call it an open vertex $v \in \partial_O V$. The remainder of boundary edges and vertices are called closed, defining $\partial_C V$ and $\partial_C E$. Physical qubits are allocated exclusively in the interior (non-open) edges, defining the interior sets $\tilde{V} = V \setminus \partial_OV$ and $\tilde{E} = E \setminus \partial_OE$. This means that the vector spaces associated with the chain complex are restricted to the non-open elements, with 0-chains and 1-chains defined as $C_0 = \bigotimes_{v \in \tilde{V}} \mathbb{Z}_2 v$ and $C_1 = \bigotimes_{e \in \tilde{E}} \mathbb{Z}_2 e$, while the 2-chains remain the same $C_2 = \bigotimes_{f \in F} \mathbb{Z}_2 f$.\\
+
+The boundary operators $\partial_2 : C_2 \rightarrow C_1$  and $\partial_1 : C_1 \rightarrow C_0$ are defined as in the closed surface but restricting the image of both operators to the interior subsets. The truncation does not alter the nilpotency condition $\partial_1 \circ \partial_2 = 0$. Therefore we can define the group ofrelative 1-cycles $Z_1^\partial$ as the kernel of $\partial_1$ and the group of relative 1-boundaries $B_1^\partial$ as the image of $\partial_2$, and $B_1^\partial \subseteq Z_1^\partial$. By discarding the open vertices in $C_0$, the definition of a relative cycle now includes subsets of non-open edges with endpoints on open vertices, thus eliminating the necessity of forming a closed path. The first relative homology group is:
+
+\begin{align}
+    H_1^\partial = \frac{Z_1^\partial}{B_1^\partial}
+\end{align}
+
 \end{document}
