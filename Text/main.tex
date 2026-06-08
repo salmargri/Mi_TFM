@@ -12,6 +12,7 @@
 \usepackage{tikz}
 \usepackage{tikz-cd}
 \usetikzlibrary{quantikz2}
+\usepackage{subcaption}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{proposition}{Proposition} 
@@ -52,7 +53,7 @@ If we concatenate the bit-flip and phase-flip codes, we can protect against an a
 
 \begin{figure}[h]
 \centering
-\input{shorcode.tex}
+\input{tikz/shorcode.tex}
 \caption{Shor Code circuit}
 \end{figure}
 
@@ -343,7 +344,7 @@ It is useful to define groups homeomorphism from $C_1$ to the group of Pauli ope
     X_c = \bigotimes_i X^{c_i}_i \quad \text{and} \quad Z_c = \bigotimes_i Z^{c_i}_i.
 \end{align}
 
-Given these homomorphisms, we can define the face and vertex operators as follows:
+Given these homomorphisms, we can define the face (or plaquette) and vertex (or star) operators as follows:
 \begin{align}
 X_f:= \prod _{e \in \partial_2 f} X_e \quad \text{and} \quad Z_v := \prod _{e |v \in \partial_1 e} Z_e
 \end{align}
@@ -352,7 +353,7 @@ Those operators are ilustrated in figure \ref{fig:surface_code}, giving a clear 
 
 \begin{figure}
 \centering
-\input{surfacecode.tex}
+\input{tikz/surfacecode.tex}
 \caption{Lattice showing the arrangement of physical qubits and the support of the stabilizer generators.}
 \label{fig:surface_code}
 \end{figure}
@@ -416,16 +417,139 @@ This means that the normalizer is given by the set of operators $A = i^k X_c Z_{
     N(\mathcal{S}) / \mathcal{S} \simeq H_1 \times H^*_1
 \end{align}
 
-Embedding a lattice on a closed surface provides a mathematically elegant way to encode quantum information using local interactions. However, the practical feasibility of arranging physical qubits on a closed surface such as a torus is questionable. However, arbitrarily truncating a closed surface code to a planar geometry destroys the non-trivial homology classes. Bravyi and Kitaev \cite{bravyi1998quantumcodeslatticeboundary} proposed a solution to this problem by introducing the concept of boundaries in surface codes. By carefully designing the boundaries of the lattice, we can preserve the non-trivial homology classes and hence the logical qubits, while still maintaining local interactions between physical qubits. This leads to the well-known planar surface code, which is one of the most promising candidates for practical quantum error correction in near-term quantum devices.\\
+\subsection{Surface Codes with Boundaries}
 
-This extension of closed surface codes is based on a notion of relative homology \cite{massey1977algebraic}, as presented in \cite{delfosse2016generalizedsurfacecodespacking}. We consider our 2-dimensional surface with a lattice defined by the graph $G=(V,E,F)$ containing boundaries. An edge is a boundary if it is incident to a single face of $G$, and the endpoints of these edges are boundary vertices. \\
+Embedding a lattice on a closed surface provides a mathematically elegant way to encode quantum information using local interactions. However, the practical feasibility of arranging physical qubits on a closed surface such as a torus is questionable, but arbitrarily truncating a closed surface code to a planar geometry destroys the non-trivial homology classes. Bravyi and Kitaev \cite{bravyi1998quantumcodeslatticeboundary} proposed a solution to this problem by introducing the concept of boundaries in surface codes. By carefully designing the boundaries of the lattice, we can preserve the non-trivial homology classes and hence the logical qubits, while still maintaining local interactions between physical qubits. This leads to the well-known planar surface code, which is one of the most promising candidates for practical quantum error correction in near-term quantum devices.\\
 
-We specify a subset of boundary edges and declare it as open, denoted $\partial_O E$. If a vertex is incident to an edge $E \in \partial_O E$, we call it an open vertex $v \in \partial_O V$. The remainder of boundary edges and vertices are called closed, defining $\partial_C V$ and $\partial_C E$. Physical qubits are allocated exclusively in the interior (non-open) edges, defining the interior sets $\tilde{V} = V \setminus \partial_OV$ and $\tilde{E} = E \setminus \partial_OE$. This means that the vector spaces associated with the chain complex are restricted to the non-open elements, with 0-chains and 1-chains defined as $C_0 = \bigotimes_{v \in \tilde{V}} \mathbb{Z}_2 v$ and $C_1 = \bigotimes_{e \in \tilde{E}} \mathbb{Z}_2 e$, while the 2-chains remain the same $C_2 = \bigotimes_{f \in F} \mathbb{Z}_2 f$.\\
+This extension of closed surface codes is based on a notion of relative homology \cite{massey1977algebraic}, as presented in \cite{delfosse2016generalizedsurfacecodespacking}. We consider our 2-dimensional surface with a lattice defined by the graph $G=(V,E,F)$ containing two categories of boundaries: open (or rough) and closed (or smooth). An edge is a boundary if it is incident to a single face of $G$, and the endpoints of these edges are boundary vertices. \\
 
-The boundary operators $\partial_2 : C_2 \rightarrow C_1$  and $\partial_1 : C_1 \rightarrow C_0$ are defined as in the closed surface but restricting the image of both operators to the interior subsets. The truncation does not alter the nilpotency condition $\partial_1 \circ \partial_2 = 0$. Therefore we can define the group ofrelative 1-cycles $Z_1^\partial$ as the kernel of $\partial_1$ and the group of relative 1-boundaries $B_1^\partial$ as the image of $\partial_2$, and $B_1^\partial \subseteq Z_1^\partial$. By discarding the open vertices in $C_0$, the definition of a relative cycle now includes subsets of non-open edges with endpoints on open vertices, thus eliminating the necessity of forming a closed path. The first relative homology group is:
+We specify a subset of boundary edges and declare it as open, denoted $\partial_O E$. If a vertex is incident to an edge $E \in \partial_O E$, we call it an open vertex $v \in \partial_O V$. The remainder of boundary edges and vertices are called closed, defining $\partial_C V$ and $\partial_C E$. Physical qubits are allocated exclusively in the interior (non-open) edges, defining the interior sets $\tilde{V} = V \setminus \partial_OV$ and $\tilde{E} = E \setminus \partial_OE$. This means that the vector spaces associated with the chain complex are restricted to the non-open elements, with 0-chains and 1-chains defined as $C_0 = \bigoplus_{v \in \tilde{V}} \mathbb{Z}_2 v$ and $C_1 = \bigoplus_{e \in \tilde{E}} \mathbb{Z}_2 e$, while the 2-chains remain the same $C_2 = \bigoplus_{f \in F} \mathbb{Z}_2 f$.\\
+
+The boundary operators $\partial_2 : C_2 \rightarrow C_1$  and $\partial_1 : C_1 \rightarrow C_0$ are defined as in the closed surface but restricting the image of both operators to the interior subsets. The truncation does not alter the nilpotency condition $\partial_1 \circ \partial_2 = 0$. Therefore we can define the group of relative 1-cycles $Z_1^\partial$ as the kernel of $\partial_1$ and the group of relative 1-boundaries $B_1^\partial$ as the image of $\partial_2$, and $B_1^\partial \subseteq Z_1^\partial$. By discarding the open vertices in $C_0$, the definition of a relative cycle now includes subsets of non-open edges with endpoints on open vertices, thus eliminating the necessity of forming a closed path. The first relative homology group is:
 
 \begin{align}
     H_1^\partial = \frac{Z_1^\partial}{B_1^\partial}
 \end{align}
+
+Intuitively, the introduction of homological degrees of freedom seems obvious, as the boundaries introduce non-trivial cycles represented as open paths on the lattice. To determine the exact number of logical qubits $k$ encoded by a surface code with boundaries, one needs to calculate the dimension of $H_1^{\partial}$ using the rank-nullity theorem:
+\begin{align} \label{dimHZB}
+    \dim \ H_1^\partial = \dim  Z_1^\partial - \dim  B_1^\partial
+\end{align}
+
+\begin{proposition} \label{dim_surface_code}
+    The dimension of the first homology group of a generalized surface code is given by:
+    \begin{align}
+    \dim H_1^\partial =-|\tilde{V}| + |\tilde{E}| - |F| + \kappa_{\overline{\partial_O V}}(G) + \kappa_{\overline{\partial_C E}}(G)
+    \end{align}
+    Where $\kappa_{\overline{\partial_O V}}(G)$ denote the number of connected components of $G$ containin no open vertices and $\kappa_{\overline{\partial_C E}}(G)$ denote the number of connected components of $G$ containing no closed edges.
+\end{proposition}
+
+\begin{proof}
+    Departing from (\ref{dimHZB}), we first obtain $\dim Z_1^\partial$, the relative cycle space of the open graph $H = (V,E)$. We construct a 2-cover graph $H_2$ devoid of open vertices by taking two identical copies of $H$ and connecting the corresponding pairs of open vertices with an extra edge. For this standard graph without open vertices, the dimension is given by  $|E| - |V| + \kappa$, where $\kappa$ is the number of connected components. Considering $H_2$:
+    \begin{align*}       
+        \dim Z_1 (H_2) = 2|\tilde{E}| + |\partial_O V| - 2|\tilde{V}| + 2\kappa_{\overline{\partial_O V}}(H) + \kappa_{\partial_O V}(H)
+    \end{align*}
+    We define the linear projection $\pi : Z_1 (H_2) \rightarrow Z_1^\partial$ that maps every cycle in $H_2$ onto its restriction in the first copy of $H$. The kernel of $\pi$ is the set of cycles contained entirely in the second copy of $H$, and hence:
+    \begin{align*}
+        \dim \ker \pi = |\tilde{E}| - |\tilde{V}| + \kappa(\tilde{H})
+    \end{align*}
+    And using the rank-nullity theorem:
+    \begin{align} \label{dim_ker}
+        \dim Z_1^\partial = \dim Z_1 (H_2) - \dim \ker \pi =|\tilde{E}| - |\tilde{V}| + \kappa_{\overline{\partial_O V}}(G)
+    \end{align}
+    Now for the relative boundaries, $B_1^\partial$ is generated by the vectors $\partial_2 f$ for all $f \in F$. If a connected component $C$ of $G$ contains at least one closed boundary edge $e \in \partial_C E$, we cannot find a combination of its faces $c_f \in C_2$, with $c_i \neq 0$ only for $f_i \in C$, such that $\partial_2 (c_f) = 0$, so the vectors $\partial_2 f$ associated with faces in this component are linearly independent. If the connected component lacks of any closed boundary edge, summing the boundary operators of all faces in the component yields the zero vector. We then conclude that:
+    \begin{align} \label{dim_im}
+        \dim B_1^\partial = |F| - \kappa_{\partial_C E}(G)
+    \end{align}
+    Thus, using equations (\ref{dimHZB}), (\ref{dim_ker}) and (\ref{dim_im}), we obtain:
+    \begin{align*}
+    \dim H_1^\partial =-|\tilde{V}| + |\tilde{E}| - |F| + \kappa_{\overline{\partial_O V}}(G) + \kappa_{\overline{\partial_C E}}(G)
+    \end{align*}
+\end{proof}
+
+There are different methods to encode a logical qubit using mixed boundaries, but we are primarily interested in continuous 2-dimensional planar patches completely devoids of internal holes or topological defects. Those are finite planar lattices forming a topological disk. \\
+
+Consider that we assign a uniform boundary to our planar patch (either closed or open). It is inmediate that
+\begin{align*}
+    \kappa_{\overline{\partial_O V}}(G) + \kappa_{\overline{\partial_C E}}(G) = 1
+\end{align*}
+as our lattice is simply connected and it has either open or closed boundaries, but not both. Applying the Euler characteristic for a disk:
+\begin{align*}
+    |V|-|E|+|F| = |\tilde{V}| + |\partial_O V| - |\tilde{E}| - |\partial_O E|+|F| = 1
+\end{align*}
+
+If the entire boundary of the disk is closed, the number of both open vertices and open edges is 0. On the other hand, if the entire boundary is open, the number of vertices and edges in the perimeter are equal and hence $|\partial_O V| - |\partial_O E| = 0$. Therefore:
+\begin{align*}
+    -|\tilde{V}| + |\tilde{E}| - |F| = -1
+\end{align*}
+and using proposition \ref{dim_surface_code}:
+\begin{align*}
+    \dim H_1^\partial = 0
+\end{align*}
+
+Hence, we conclude the necessity of using mixed boundaries to encode a logical qubit on our planar patch. We specifically propose a rectangular planar surface code where opposing parts of the perimeter are assigned the same type of boundaries, as represented in figure \ref{fig:planarpatch}.\\
+
+\begin{figure}
+    \centering
+    \input{tikz/planarpatch.tex}
+    \caption{A planar patch. The top and bottom edges are closed (smooth) boundaries and the left and right edges are open (rough) boundaries. The black circles are once again physical qubits, and as we can see the open edges are not associated with any physical qubit.}
+    \label{fig:planarpatch}
+\end{figure}
+
+For any of the sides of the perimeter, $|V_s| - |E_S| = 1$. Therefore, $|\partial_O V| - |\partial_O E| = 2$. Applyin this and the Euler characteristic for the disk:
+
+\begin{align*}
+    -|\tilde{V}| + |\tilde{E}| - |F| &= -|V| + |E| - |F| + |\partial_O V| - |\partial_O E|\\
+    &=-1+2 = 1
+\end{align*}
+
+We also notice that $\kappa_{\overline{\partial_O V}}(G) = \kappa_{\overline{\partial_C E}}(G) = 0$. Therefore, the dimension of the first homology group $\dim H_1 ^\partial = 1$, successfully encoding one logical qubit in our planar surface code. \\
+
+If we consider this prototypical realization of the planar surface code, we see that Z-type star stabilizers at each vertex and X-type plaquette stabilizers at each face in the interior of the lattice simultaneously stabilize four qubits. On the other hand, vertices in the smooth boundaries are only connected to 3 edges, and therefore the Z-type stabilizers along the rough boundaries are weight-3 operators. If we consider faces adjacent to rough boundaries, they are bounded by only three interior edges (therefore three physica qubits), so the X-type plaquette stabilizers along the rough boundaries are weight-3 operators too. Those weight-3 stabilizeres can be seen as algorithmic "sinks", allowing error chains to terminate on the boundaries of the lattice without pushing the system out of the code subspace. \\
+
+
+\subsection{Logical Operators and the Distance of the Code}
+
+Following the connection between homology and logical operators established for the closed surface, we can now define the logical operators for the planar surface code. The logical Pauli operators correspond to the non-trivial equivalence classes of the relative homology group $H_1^\partial$ and its dual. A logical $X_L$ operator is represented by a chain of physical $X$ operators along a path connecting two distinct open (rough) boundaries. Such a path is a relative 1-cycle because its boundary endpoints lie entirely within the open vertices, meaning it has an empty boundary in the interior subset $\tilde{V}$. Hence, it commutes with all vertex stabilizers. \\
+
+Similarly, by considering the dual lattice, a logical $Z_L$ operator is formed by a chain of physical $Z$ operators connecting two closed (smooth) boundaries. These operators commute with all stabilizers but cannot be constructed as a product of them, as they are not relative boundaries. As we showed, a standard planar surface code encodes a single logical qubit ($k=1$) by featuring two opposite open boundaries and two opposite closed boundaries. This topology allows for one independent $X_L$ path and one independent $Z_L$ path. These paths must intersect at exactly one physical qubit (or an odd number of them), ensuring the necessary anti-commutation relation $\{X_L, Z_L\} = 0$ for the logical Pauli algebra.\\
+
+The distance of the planar surface code is determined by the minimum weight of a non-trivial logical operator. For the $X_L$ operator, this is the length of the shortest path between the two rough boundaries, often denoted as the horizontal width $d_x$. For the $Z_L$ operator, the distance is the length of the shortest path between the two smooth boundaries, denoted as the vertical height $d_z$. The overall distance $d$ of the code is $\min(d_x, d_z)$. \\
+
+Executing the planar surface code demands continuous syndrome extraction across the lattice. In order to measure the stabilizers, ancillary measure qubits are interlaced among the data qubits \cite{Fowler2012}, as shown in figure \ref{fig:ancilla_surface_code}.\\
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.7\textwidth}
+        \centering
+        \input{tikz/syndromextraction.tex}
+        \caption{A distance 5 planar surface code. Black dots represent data qubits, and white dots represent ancillary qubits. Green squares are X-type plaquettes stabilizers and orange squares are Z-type star stabilizers.}
+        \label{fig:ancilla_surface_code}
+    \end{subfigure}
+    
+    \vspace{2em}
+    -
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \input{tikz/z-syndrome.tex}
+        \caption{Z-syndrome}
+        \label{fig:z-syndrome}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \input{tikz/x-syndrome.tex}
+        \caption{X-syndrome}
+        \label{fig:x-syndrome}
+    \end{subfigure}
+    
+    \caption{}
+    \label{fig:surface_code_full}
+\end{figure}
+
+Syndrome qubits are placed in the centre of each plaquette and in each vertex, and they measure the stabilizer by the application of a standarized sequence of CNOT gates, where the data qubits are control and the ancilla qubit is target, thus entangling the ancilla qubit with its surroundin data qubits. The circuits are shown in figures \ref{fig:x-syndrome} and \ref{fig:z-syndrome}.
+
+\newpage
+\printbibliography
 
 \end{document}
