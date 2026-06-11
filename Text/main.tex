@@ -13,12 +13,18 @@
 \usepackage{tikz-cd}
 \usetikzlibrary{quantikz2}
 \usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{makeidx}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{proposition}{Proposition} 
 \newtheorem{definition}[proposition]{Definition}
 
+\makeindex
+
 \begin{document}
+
 
 \section{Quantum Error Correction}
 
@@ -518,36 +524,108 @@ The distance of the planar surface code is determined by the minimum weight of a
 
 Executing the planar surface code demands continuous syndrome extraction across the lattice. In order to measure the stabilizers, ancillary measure qubits are interlaced among the data qubits \cite{Fowler2012}, as shown in figure \ref{fig:ancilla_surface_code}.\\
 
-\begin{figure}
+\begin{figure}[!ht] 
     \centering
-    \begin{subfigure}[b]{0.7\textwidth}
+    
+    \begin{subfigure}[b]{0.5\textwidth} 
         \centering
-        \input{tikz/syndromextraction.tex}
-        \caption{A distance 5 planar surface code. Black dots represent data qubits, and white dots represent ancillary qubits. Green squares are X-type plaquettes stabilizers and orange squares are Z-type star stabilizers.}
+        \resizebox{\linewidth}{!}{\input{tikz/syndromextraction.tex}}
+        \caption{}
         \label{fig:ancilla_surface_code}
     \end{subfigure}
     
-    \vspace{2em}
-    -
-    \begin{subfigure}[b]{0.48\textwidth}
+    \vspace{1em} 
+    
+    \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \input{tikz/z-syndrome.tex}
-        \caption{Z-syndrome}
+        \resizebox{\linewidth}{!}{\input{tikz/z-syndrome.tex}}
+        \caption{}
         \label{fig:z-syndrome}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
+    \begin{subfigure}[b]{0.45\textwidth}
         \centering
-        \input{tikz/x-syndrome.tex}
-        \caption{X-syndrome}
+        \resizebox{\linewidth}{!}{\input{tikz/x-syndrome.tex}}
+        \caption{}
         \label{fig:x-syndrome}
     \end{subfigure}
     
-    \caption{}
+    \caption{(a) A distance 5 planar surface code. Black dots represent data qubits, and white dots represent ancillary qubits. Green squares are X-type plaquettes stabilizers and orange squares are Z-type star stabilizers. (b) Z-syndrome. (c) X-syndrome.}
     \label{fig:surface_code_full}
 \end{figure}
 
 Syndrome qubits are placed in the centre of each plaquette and in each vertex, and they measure the stabilizer by the application of a standarized sequence of CNOT gates, where the data qubits are control and the ancilla qubit is target, thus entangling the ancilla qubit with its surrounding data qubits. The circuits are shown in figures \ref{fig:x-syndrome} and \ref{fig:z-syndrome}.
+
+\section{Practical Problem}
+
+The implementation of quantum algorithms in fault-tolerant arquitectures require their treatment in a model that does not impose the unitary evolution of standard circuit models. The practical problem of this work can be summarized as the compilation of quantum protocols in terms of a problem of topological optimization of tensor networks using ZX calculus.\\
+
+Given a quantum circuit $\mathcal{C}$, we have a translation map $\mathcal{T}: \mathcal{C} \rightarrow D_{ZX}$, where $D_{ZX}$ is a ZX diagram obtained by the substitution of rotations in $Z$ and $X$ bases by green and red spiders, as well as the initialization of qubits and measures \cite{vandaele2024qubitcountoptimizationusingzxcalculus}. \\
+
+The resource cost of a given computation is naturally captured by its space-time volume \cite{zhou2026topolslatticesurgerycompilation}, defined as its spatial footprint (number of qubits) times its execution time (number of error correction cycles required). As lattice surgery operations exhibit a direct correspondence with spiders in ZX calculus,  the topoloica deformation of a ZX diagram necessarily implies the reestructuration of its physical operations. Hence, the compilation problem can be formulated as an optimization problem:
+\begin{align} \label{optimization}
+    \min V(D'_{ZX}) \quad \text{such that} \quad [[D'_{ZX}]] = [[D_{ZX}]]
+\end{align}
+where $[[\cdot]]$ represents the lineal map described by the object. Applying rewrite rules allows to drastically optimize the metric.\\
+
+For the computational implementation of the problem, we will use PyZX framework, an open source python-based library specifically designed for diagramatic reasoning in ZX calculus \cite{Kissinger_2020}. At the software architecture level, PyZX abstract the problem usin two main data-structures: circuits and graphs. \\
+
+The circuit class captures the standard representation of quantum protocols as a sequential application of quantum gates. On the other hand, the graph class instantiates the equivalent ZX diagram, which provides a more interesting object for our purpose. \\
+
+This library has built-in hierarchical simplification strategies. The rules consist of a matcher and a rewriter. At a lower level, the matchers is nothing but a composition of heuristic routines searching for subgraphs satisfying the structural conditions for any of the axiomatic rules of ZX calculus. Once it returns the list of matches, the rewriter applies the corresponding simplifications. [AMPLIAR CON REWRITE STRATEGIES COMPLETAS].\\
+
+This framework will provide the necessary tools for the algorithmic implementation of quantum routines in ZX diagrams, as well as for their topological optimization.
+
+\subsection{Quantum Teleportation}
+
+Quantum teleportation is a well-known protocol that transfers an unknown quantum state from one qubit to another \cite{NielsenChuang2010}. In order to perform this, the protocol consumes two resources: pre-shared quantum entanglement and classical information communication. The standard realization of quantum teleportation is depicted in figure \ref{fig:teleportation_circuit}.
+
+\begin{figure} [ht]
+    \centering
+    \input{tikz/teleportation_circuit.tex}
+    \caption{Stardard quantum teleportation circuit.}
+    \label{fig:teleportation_circuit}
+\end{figure}
+
+Consider Alice has a qubit in an initial quantum state $\ket{\psi} = \alpha \ket{0} + \beta \ket{1}$. Alice and Bob share a maximally entangled pair of qubit, for instance 
+\begin{align*}
+    \ket{\Psi ^+} = \frac{1}{\sqrt{2}}(\ket{00} + \ket{11})
+\end{align*}
+
+so the initial state is:
+
+\begin{align*}
+    \ket{\psi _0} = \ket{\psi} \otimes \ket{\Psi ^+} = \frac{1}{\sqrt{2}} [\alpha (\ket{000}] + \ket{001}) + \beta (\ket{100} + \ket{111})]
+\end{align*}
+
+Alice performs a local interaction with the first two qubits. Firstly, she applies a CNOT, using the unknown qubit as control, and then she applies a Hadamard gate on it. The transmitter's qubits are mapped to a Bell state. The lobal state is given now by:
+
+\begin{align*}
+    \ket{\psi_1} &= \frac{1}{2} [ \ket{00}(\alpha\ket{0} + \beta\ket{1}) + \ket{01}(\alpha\ket{1} + \beta\ket{0}) \\
+    &+ \ket{10}(\alpha\ket{0} - \beta\ket{1}) + \ket{11}(\alpha\ket{1} - \beta\ket{0}) ]
+\end{align*}
+
+Alice then performs a proyective measure on her two qubits, obtaining two classical variables $m_1, m_2 \in \{ 0,1 \} $. This measure destroys local entanglement, but transports the original unknown state to Bob's qubit. It actually transmits an encrypted version of $\ket{\psi}$, depending on the classical variables:
+\begin{itemize}
+    \item If $(m_1,m_2) = (0,0)$, the state is $\alpha \ket{0} + \beta \ket{1}$ ($\ket{\psi}$).
+    \item If $(m_1,m_2) = (0,1)$, the state is $\alpha \ket{1} + \beta \ket{0}$ ($X\ket{\psi}$).
+    \item If $(m_1,m_2) = (1,0)$, the state is $\alpha \ket{0} - \beta \ket{1}$ ($Z\ket{\psi}$).
+    \item If $(m_1,m_2) = (1,1)$, the state is $\alpha \ket{1} - \beta \ket{0}$ ($ZX\ket{\psi}$).
+\end{itemize}
+
+To recover the original state, we need to transmit the two classical bits to Bob and perform the corresponding Pauli gate. \\
+
+The election of quantum teleportation as the first routine to implement and optimize does not respond to an arbitrary volition, but rather to its structural relevance due to hardware limitations. The restricted local connectivity of fault-tolerant arquitectures makes the implementation of logical gates among distant planar patches prohibitive in terms of resources. Therefore, teleportation acquires an undisputed importance, allowing the propagation of quantum information along the processors, as well as being a fundamental ingredient for the transversal implementation of non-Clifford gates \cite{deBeaudrap2020}, surpassing the technical limitations imposed by the Eastin-Knill theorem.
+
+\subsection{CHSH Game}
+
+The interest of implementing CHSH game (named after Clauser, Horne, Shimony and Holt \cite{CHSH}) resides on two reasons: it provides sufficient proof to demonstrate quantum advantage against any hidden variables theory; and it also justify the introduction of non-Clifford resources in fault-tolerant architectures.\\
+
+CHSH game is a problem in information theory that can be modeled as a non-local cooperative game \cite{watrous2025understandingquantuminformationcomputation}. Two distant players, Alice and Bob, receive each a classical bit of information $x \in \{ 0,1 \}$ and $y \in \{ 0,1 \}$. Without any communication, each of them must produce an output bit $a \in \{ 0,1 \}$ and $b \in \{ 0,1 \}$, such that they satisfy this boolean relation:
+\begin{align*}
+    a \oplus b = x \cdot y
+\end{align*}
+For any strategy restricted to classical phenomena, the probability of winning the game is upper bounded $P_{classic} \leq 0.75$. We can define a quantum strategy that violates this limit. This requires that Alice and Bob share an entangled pair of quibts, characterized by a Bell state $\ket{\Psi ^+} = 1/\sqrt{2}(\ket{00} + \ket{11})$. Alice and Bob perform their measure in different basis, depending on the classical qubit they receive. Alice will measure in the computational basis $Z$ if $x=0$, or in the diagonal basis $X$ if $x=1$, and Bob will measure in the oblique intermediate basis, with a $\pi / 4 $ gap.
 
 \newpage
 \printbibliography
