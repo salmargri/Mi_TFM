@@ -576,6 +576,14 @@ This library has built-in hierarchical simplification strategies. The rules cons
 
 This framework will provide the necessary tools for the algorithmic implementation of quantum routines in ZX diagrams, as well as for their topological optimization.
 
+\subsection{Logical Verification and Physical Synthesis Duality}
+
+PyZX has certain routines, such as \texttt{full\_reduce}, that simplify the original diagram in a way that could break its physical interpretation in terms of lattice surgery operations. This makes evident the two computational regimes in which ZX diagrams may operate, at least in the context of this work. \\
+
+On the one hand, ZX calculus represents an intermediate representation of hardware operations where each transformation saves physical resources \cite{zhou2026topolslatticesurgerycompilation}. For instance, the spiders fusion rule reflects the physical fact that two sequential split (or merge) operations along the same type of boundaries can be unified. This approach helps to reduce the space-time volume of a given protocol. \\ 
+
+On the other hand, ZX calculus can be used for logical verification of semantic equivalence. Complex sets of unitary gates can be transformed in a ZX diagram, and its simplification can manifest semantic equivalence with a more intuitive process. This will be clearly illustrated in the implementation of quantum teleportation.
+
 \subsection{Quantum Teleportation}
 
 Quantum teleportation is a well-known protocol that transfers an unknown quantum state from one qubit to another \cite{NielsenChuang2010}. In order to perform this, the protocol consumes two resources: pre-shared quantum entanglement and classical information communication. The standard realization of quantum teleportation is depicted in figure \ref{fig:teleportation_circuit}.
@@ -589,7 +597,7 @@ Quantum teleportation is a well-known protocol that transfers an unknown quantum
 
 Consider Alice has a qubit in an initial quantum state $\ket{\psi} = \alpha \ket{0} + \beta \ket{1}$. Alice and Bob share a maximally entangled pair of qubit, for instance 
 \begin{align*}
-    \ket{\Psi ^+} = \frac{1}{\sqrt{2}}(\ket{00} + \ket{11})
+    \ket{\Phi ^+} = \frac{1}{\sqrt{2}}(\ket{00} + \ket{11})
 \end{align*}
 
 so the initial state is:
@@ -619,14 +627,122 @@ The election of quantum teleportation as the first routine to implement and opti
 
 \subsection{CHSH Game}
 
-The interest of implementing CHSH game (named after Clauser, Horne, Shimony and Holt \cite{CHSH}) resides on two reasons: it provides sufficient proof to demonstrate quantum advantage against any hidden variables theory; and it also justify the introduction of non-Clifford resources in fault-tolerant architectures.\\
+The interest of implementing CHSH game (named after Clauser, Horne, Shimony and Holt \cite{CHSH}) resides on two reasons: it provides sufficient proof to demonstrate quantum advantage against any hidden variables theory; and it also justifies the introduction of non-Clifford resources in fault-tolerant architectures.\\
 
 CHSH game is a problem in information theory that can be modeled as a non-local cooperative game \cite{watrous2025understandingquantuminformationcomputation}. Two distant players, Alice and Bob, receive each a classical bit of information $x \in \{ 0,1 \}$ and $y \in \{ 0,1 \}$. Without any communication, each of them must produce an output bit $a \in \{ 0,1 \}$ and $b \in \{ 0,1 \}$, such that they satisfy this boolean relation:
 \begin{align*}
     a \oplus b = x \cdot y
 \end{align*}
-For any strategy restricted to classical phenomena, the probability of winning the game is upper bounded $P_{classic} \leq 0.75$. We can define a quantum strategy that violates this limit. This requires that Alice and Bob share an entangled pair of quibts, characterized by a Bell state $\ket{\Psi ^+} = 1/\sqrt{2}(\ket{00} + \ket{11})$. Alice and Bob perform their measure in different basis, depending on the classical qubit they receive. Alice will measure in the computational basis $Z$ if $x=0$, or in the diagonal basis $X$ if $x=1$, and Bob will measure in the oblique intermediate basis, with a $\pi / 4 $ gap.
+For any strategy restricted to classical phenomena, the probability of winning the game is upper bounded $P_{classic} \leq 0.75$. We can define a quantum strategy that violates this limit. This requires that Alice and Bob share an entangled pair of quibts, characterized by a Bell state $\ket{\Psi ^+} = 1/\sqrt{2}(\ket{00} + \ket{11})$. Let's discuss the quantum strategy in detail. We start by defining a qubit state vector $\ket{\psi_{\theta}}$ in terms of an angle $\theta$:
+\begin{align*}
+    \ket{\psi_{\theta}} = \cos(\theta) \ket{0} + \sin(\theta) \ket{1}
+\end{align*}
+The inner product of any two of these vectors is given by:
+\begin{align*}
+    \bra{\psi_{\alpha}} \ket{\psi_{\beta}} = \cos(\alpha) \cos(\beta) + \sin(\alpha) \sin(\beta) = \cos(\alpha - \beta)
+\end{align*}
+and if we commpute the inner product of the tensor product of any of these vectors with the Bell state $\ket{\Phi^+}$:
+\begin{align} \label{inner_product_CHSH}
+    \bra{\psi_{\alpha} \otimes \psi_{\beta}} \ket{\Phi^+} = \frac{\cos(\alpha - \beta)}{\sqrt{2}}
+\end{align}
+We also define a unitary matrix $U_\theta$:
+\begin{align*}
+    U_\theta = \ket{0} \bra{\psi_\theta} + \ket{1} \bra{\psi_{\theta+\pi/2}}
+\end{align*}
 
+Which in a standar convention would be $U_\theta = R_y(-2 \theta)$. Alice and Bob share an entangled pair of qubits (A,B) in state $\ket{\Phi^+}$. They receive the physical bit of information, and then perform an operation on their qubits, depending on which classical variable they received. If Alice receives $x=0$, she will perform $U_0$, and $U_{\pi/4}$ for $x=1$. On the other hand, Bob will perform $U_{\pi/8}$ for $y=0$ and $U_{-\pi/8}$ for $y=1$. After they perform this operation, they make a measure of their qubits, and the classical output they obtain are their answers. \\
+
+For illustrative purposes, let's consider the case $(x,y)=(0,0)$ using equation \ref{inner_product_CHSH}:
+\begin{align*}
+(U_0 \otimes U_{\pi/8}) \ket{\phi^+} &= \ket{00} \bra{\psi_0 \otimes \psi_{\pi/8}} \ket{\phi^+} + \ket{01} \bra{\psi_0 \otimes \psi_{5\pi/8}} \ket{\phi^+} \\
+&\quad + \ket{10} \bra{\psi_{\pi/2} \otimes \psi_{\pi/8}} \ket{\phi^+} + \ket{11} \bra{\psi_{\pi/2} \otimes \psi_{5\pi/8}} \ket{\phi^+} \\[1ex]
+&= \frac{\cos\left(-\frac{\pi}{8}\right)\ket{00} + \cos\left(-\frac{5\pi}{8}\right)\ket{01} + \cos\left(\frac{3\pi}{8}\right)\ket{10} + \cos\left(-\frac{\pi}{8}\right)\ket{11}}{\sqrt{2}}.
+\end{align*}
+
+And the probability of winning the game is:
+\begin{align*}
+    P(a=b)= \cos^2(-\frac{\pi}{8}) = \frac{2 + \sqrt{2}}{4} \approx 0.85
+\end{align*}
+
+For the remaining three cases, the probability is exactly the same \cite{watrous2025understandingquantuminformationcomputation}, violating the classical limit of $P_{classic} \leq 0.75$. The realization of this strategy in standard circuit model can be seen in figure \ref{fig:CHSH_circuit}.
+
+\begin{figure}[ht]
+    \centering
+    \input{tikz/CHSH_circuit.tex}
+    \caption{CHSH circuit for $(x,y) = (0,0)$}
+    \label{fig:CHSH_circuit}
+\end{figure}
+
+Alice's rotations $U_0$ and $U_{\pi /4}$ are the identity operation and a Hadamard gate. On the other hand, Bob's rotations $U_{\pi/8}$ and $U_{-\pi/8}$ introduce non-Clifford operations. This enforces the use of magic-state distillation, as the Eastin-Knill theorem prevents us from obtaining a transversal realization of the T gate on a planar surface code. But, as we have already discussed, the injection of magic-states is extremely costly.\\
+
+When we convert our circuit model to a ZX diagram, PyZX will model the T gate as a phase gadget. This allows us to push the non-Clifford gates through the diagram to find non-local cancelations \cite{PhysRevA.102.022406}, reducing the T-count and hence the computational cost of the circuit. \\
+
+\subsection{Magic Square Game}
+
+The Mermin-Peres magic square game is a pseudo-telepathy scenario that illustrates quantum contextuality \cite{Laghaout_2022}. It is once again a cooperative non-local game played by two distant players, Alice and Bob. They are given a 3 x 3 square which they must fill in a specific way. Alice is asigned a random row, and Bob is given a random column. Each must complete their corresponding cells with values $\pm1$, satisfying the following conditions:
+\begin{itemize}
+    \item Alice's row must contain an odd number of plus signs.
+    \item Bob's column must contain an odd number of minus signs.
+    \item The cell where Alice's row and Bob's column intersect must contain the same value for both players.
+\end{itemize}
+
+It is easy to see that no classical strategy can produce a victory probability of 100\%, as this would imply the construction of a 3 x 3 matrix where all the rows add up to +1 and all the columns add up to -1, so the global product of the matrix evaluated on the rows would differ from that evalauted on the columns. \\
+
+However, the use of quantum resources may ensure a deterministically winning strategy. Alice and Bob would need to share two pairs of maximally entangled pairs of qubits. For instance, we could have a global state could described by $\ket{\Phi^+} \otimes \ket{\Phi^+}$. Each of them will take one qubit from each pair. \\
+
+Instead of buildin a 3 x 3 matrix with $\pm1$ values, we construct a 3 x 3 ggrid composed of elements of $\mathcal{P}_2$. We can use this specific arrangement:
+
+\[
+\renewcommand{\arraystretch}{2.5}
+\begin{array}{|c|c|c|}
+\hline
++I \otimes Z & +Z \otimes I & +Z \otimes Z \\
+\hline
++X \otimes I & +I \otimes X & +X \otimes X \\
+\hline
+-X \otimes Z & -Z \otimes X & +Y \otimes Y \\
+\hline
+\end{array}
+\]
+
+Now the referee gives them their assignments, and they perform the corresponding measurements on their qubits based on the grid above. As we can see, the three operators in any of the rows commute, so Alice can measure them simultaneously. If you multiply the three operators in any row, they yield $I \otimes I$. The product of Alice's three measurement will always be $+1$. On the other hand, the operators in any of the columns also commute, so Bob can measure simultaneously too. The product of the three operators in any column is $-I \otimes I$, so the product of Bob's measurements will always be $-1$. \\
+
+As the qubits are in a Bell state, when Alice and Bob make the measures corresponding to the same cell in the grid, they will obtain the same result. The three conditions are fulfilled, and hence we have defined a deterministically winning quantum strategy. \\
+
+The implementation of this game in the unitary circuits paradigm begins by preparing the two pairs of entangled qubits. Then, a classical control decides the specific unitary rotations that Alice and Bob apply on their qubits. To illustrate how these measures are performed, let's consider the case where Alice is assigned the third row and Bob gets the first column. We consider that measurements can be performed in the Z direction, and hence we need to make some necessary rotations to measure the required observables. Alice's first two observables are $-X \otimes Z$ and $-Z \otimes X$. We want to understand the necessary transformation of these operators in the Heisenberg picture in order to obtain the measurable observables $Z \otimes I$ and $I \otimes Z$. Specifically, we want to find a unitary sequence $U$ that maps Alice's two first observables into single-qubit Z measurements:
+\begin{itemize}
+    \item $-X \otimes Z \rightarrow Z \otimes I$
+    \item $-Z \otimes X \rightarrow I \otimes Z$
+\end{itemize}
+We can clearly see how a CZ gate can disentangle the operators:
+\begin{align*}
+    CZ (X \otimes Z) CZ = X \otimes I \\
+    CZ (Z \otimes X) CZ = I \otimes X
+\end{align*}
+
+Now we rotate to the Z-axis:
+\begin{align*}
+    (H \otimes H)(-X \otimes I)(H \otimes H) = -Z \otimes I \\
+    (H \otimes H)(-I \otimes X)(H \otimes H) = -I \otimes Z
+\end{align*}
+
+We finally fix the parity by applying X gates:
+
+\begin{align*}
+    (X \otimes X)(-Z \otimes I)(X \otimes X) = Z \otimes I \\
+    (X \otimes X)(-I \otimes Z)(X \otimes X) = I \otimes Z
+\end{align*}
+
+Hence, by applying this specific sequence of operators and measuring the first two qubits, we obtain the eigenvalues for the observables $-X \otimes Z$ and $-Z \otimes X$. We also notice that the last observable can be expressed in terms of the first two, $(Y \otimes Y) = (-X \otimes Z) \cdot (-Z \otimes X)$. So Alice's answer for cell 3 can be determined by obtaining the product of the first two eigenvalues. The specific implementation of this game can be seen in figure \ref{fig:mermin_peres_circuit}.
+
+\begin{figure}[ht]
+    \centering
+    \input{tikz/mermin_peres_circuit.tex}
+    \caption{Mermin-Peres game circuit implementation for the first column and the third row.}
+    \label{fig:mermin_peres_circuit.tex}
+\end{figure}
+
+ 
 \newpage
 \printbibliography
 
