@@ -780,7 +780,7 @@ For each of the diagrams $D_{ZX}(m_0,m_1)$, $m_0, m_2 \in \{0,1\}$, we perform t
 \begin{figure} [ht]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/IdentityChannel.png}
-    \caption{ZX diagram corresponding to a standard quantum teleportation.}
+    \caption{Identity channel resulting from the simplification of the teleportation diagrams}
     \label{fig:Identity_Channel}
 \end{figure}
 
@@ -825,6 +825,65 @@ If we compare figures \ref{fig:teleportation3} and \ref{fig:teleportation4}, we 
 \end{figure}
 
 Now, the original state represents an independent entry wire, while the two entangled logical qubits are firstly merged and prepared in the $\ket{0}_L$ state and then separated through a smooth split. The first two qubits are then entangled. This realization of the algorithm reduces the maximum layer index from 5 to 4, and the pathwidth is not reduced. It represents a smaller optimization, but a more useful realization.
+
+\subsection{CHSH Game in PyZX}
+
+In contrast to the evaluation of the teleportation protocol---where the compiler's objective resided in preserving open logical wires to demonstrate the invariance of the identity channel $\mathcal{I}$---the topological instantiation of the CHSH game is formulated as the strict evaluation of a closed tensor network. \\
+
+In the diagrammatic formulation using PyZX, the classical variables of the referee $(x, y \in \{0, 1\})$ modulate the local rotation sequences, while the joint measurement outcomes $(m_0, m_1 \in \{0, 1\})$ are imposed as strict boundary conditions on the output ports. These are instantiated via arity-1 tensors of type X (red spiders) with phases $m_i \pi$. This total closure of the topological boundaries, as shown in figure \ref{fig:CHSH1}, transforms the diagram from a linear matrix operator $\mathcal{H} \to \mathcal{H}$ into a rank-0 tensor, i.e., a complex scalar. Semantically, the closed graph represents the geometric isomorphism of the exact probability amplitude for each branch:
+\begin{equation}
+    \mathcal{A}_{x,y}(m_0, m_1) =  \ket{m_0 m_1} U_{x,y} \ket{00}
+\end{equation}
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/CHSH1.png}
+    \caption{ZX diagram corresponding to $(x,y)=(0,0)$ and $(m_0, m_1)=(0,0)$}
+    \label{fig:CHSH1}
+\end{figure}
+
+By iterating programmatically over the 16 possible permutations dictated by the combinations of $(x, y)$ and $(m_0, m_1)$, and subjecting each resulting diagram to the algebraic simplification heuristics, a singular analytical phenomenon is observed: the tensor network collapses entirely into a visually empty diagram. \\
+
+Far from representing an algorithmic error or a loss of information, the topological annihilation of all nodes and edges constitutes the geometric manifestation of a successful \textbf{strong simulation}. The rewriting engine of the Frobenius subalgebra contracts the entirety of the lattice surgery isometries alongside the non-Clifford rotations ($\pm \pi/4$), fully resolving the underlying system of algebraic equations. The empty diagram signifies that the ZX-calculus has successfully evaluated the full trace of the tensor network, encapsulating the complex amplitude $\mathcal{A}_{x,y}(m_0, m_1)$ within the global scalar factor of the remaining graph.\\ 
+
+This absolute collapse validates the compiler's capability to act as a deterministic evaluator of multipartite systems. By mathematically recovering the scalar hidden within each ``empty diagram'', one obtains direct access to the exact marginal probability distribution $P(m_0, m_1 | x, y) = |\mathcal{A}_{x,y}(m_0, m_1)|^2$ \cite{Kissinger_2022} \cite{Sutcliffe_2025}. This extraction is a fundamental prerequisite for the subsequent certification of the analytical violation of the local hidden-variable (LHV) bounds within the surface code topology. \\
+
+Indeed, once we extract the marginal probability amplitude from each of the diagrams and compute the probability of victory for each pair of classical variables $(x,y)$, we obtain $P_{quantum} \approx 0.85$, violating the LHV bounds. \\
+
+Now we can connect a key element of quantum information theory with the hardware realities of fault-tolerant architectures by discussing the implementation and compilation of the protocol. As we did in the teleportation diagram, we exclude the measurement projections:
+\begin{figure} [ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/CHSH2.png}
+    \caption{ZX diagram for the implementation of CHSH game, corresponding to $(x,y)=(0,0)$.}
+    \label{fig:CHSH2}
+\end{figure}
+
+Bob's measurements require rotations in the $Y$ axis with angles of $\pm \pi /4$, which are not elements of the Clifford group. The simplification routines cannot annihilate them, and this is not an avoidable hardware limitation but rather a consequence of the Eastin-Knill theorem, as our fault-tolerant architecture necessarily lacks of a universal set of transversal quantum gates. \\
+
+Consequently, the realization of the CHSH protocol forces the compiler to invoke magic state injection protocols \cite{robertson2025resourceallocatingcompilerlattice}, which are extremely costly, as we have already discussed. The greatest contribution to the space-time volume for this realization comes from the requirement of non-Clifford resources, not from generating the initial entanglement.\\
+
+Even so, we perform our simplification routine to each of the four possible diagrams. The procedure yields a significat reduction of Clifford gates, which, as we have already stated, does not imply a huge reduction of execution time, but it is still an optimization. 
+\begin{figure} [ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/CHSH3.png}
+    \caption{Simplification of the ZX diagram for the implementation of CHSH game, corresponding to $(x,y)=(0,0)$.}
+    \label{fig:CHSH3}
+\end{figure}
+The topological depth for each of the four branches is reduced from 6 to 3. The pathwidth remains the same. The traslation of the diagram to lattice surgery primitives is inmediate:
+\begin{itemize}
+    \item We prepare a logical qubit in the state $\ket{0} + e^{i 3 \pi /2} \ket{1}$.
+    \item A smooth split is performed, and then we apply a $T$ gate on Bob's qubit.
+    \item A final $S$ gate is performed on Bob's qubit, and after that we measure each qubit.
+\end{itemize}
+
+The realization in figure \ref{fig:CHSH3} could not be feasible due to the fact that we are preparing an initial state that does not belong to the computational basis. Another realization with a better physical translation is shown in \ref{fig:CHSH4}
+\begin{figure} [ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/CHSH4.png}
+    \caption{Simplification of the ZX diagram for the implementation of CHSH game, corresponding to $(x,y)=(0,0)$, and with preparation of initial state in the computational basis.}
+    \label{fig:CHSH4}
+\end{figure}
+The topological depth is reduced from 6 in \ref{fig:CHSH2} to 5 in figure \ref{fig:CHSH4}.
 \newpage
 \printbibliography
 

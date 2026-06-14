@@ -539,6 +539,55 @@
       \verb https://link.aps.org/doi/10.1103/PhysRevA.102.022406
       \endverb
     \endentry
+    \entry{Kissinger_2022}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=0dcc317455baeefdf9b65140659af27d}{%
+           family={Kissinger},
+           familyi={K\bibinitperiod},
+           given={Aleks},
+           giveni={A\bibinitperiod}}}%
+        {{hash=32471ac72f0b6cde225e6514037aa7ea}{%
+           family={Wetering},
+           familyi={W\bibinitperiod},
+           given={John},
+           giveni={J\bibinitperiod},
+           prefix={van\bibnamedelima de},
+           prefixi={v\bibinitperiod\bibinitdelim d\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {IOP Publishing}%
+      }
+      \strng{namehash}{0b241f38a6c1c54d931108b8753deb57}
+      \strng{fullhash}{0b241f38a6c1c54d931108b8753deb57}
+      \strng{fullhashraw}{0b241f38a6c1c54d931108b8753deb57}
+      \strng{bibnamehash}{0b241f38a6c1c54d931108b8753deb57}
+      \strng{authorbibnamehash}{0b241f38a6c1c54d931108b8753deb57}
+      \strng{authornamehash}{0b241f38a6c1c54d931108b8753deb57}
+      \strng{authorfullhash}{0b241f38a6c1c54d931108b8753deb57}
+      \strng{authorfullhashraw}{0b241f38a6c1c54d931108b8753deb57}
+      \field{extraname}{3}
+      \field{sortinit}{K}
+      \field{sortinithash}{c02bf6bff1c488450c352b40f5d853ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{2058-9565}
+      \field{journaltitle}{Quantum Science and Technology}
+      \field{number}{4}
+      \field{title}{Simulating quantum circuits with ZX-calculus reduced stabiliser decompositions}
+      \field{volume}{7}
+      \field{year}{2022}
+      \field{pages}{044001}
+      \range{pages}{1}
+      \verb{doi}
+      \verb 10.1088/2058-9565/ac5d20
+      \endverb
+      \verb{urlraw}
+      \verb http://dx.doi.org/10.1088/2058-9565/ac5d20
+      \endverb
+      \verb{url}
+      \verb http://dx.doi.org/10.1088/2058-9565/ac5d20
+      \endverb
+    \endentry
     \entry{Kitaev2003}{article}{}{}
       \name{author}{1}{}{%
         {{hash=34266a35eedbd87dd79c5e408127a5e5}{%
@@ -746,6 +795,52 @@
       \field{edition}{10th Anniversary}
       \field{title}{Quantum Computation and Quantum Information}
       \field{year}{2010}
+    \endentry
+    \entry{Sutcliffe_2025}{article}{}{}
+      \name{author}{2}{}{%
+        {{hash=6b79ddc242c82e0b95e92d1020539061}{%
+           family={Sutcliffe},
+           familyi={S\bibinitperiod},
+           given={Matthew},
+           giveni={M\bibinitperiod}}}%
+        {{hash=0dcc317455baeefdf9b65140659af27d}{%
+           family={Kissinger},
+           familyi={K\bibinitperiod},
+           given={Aleks},
+           giveni={A\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {Open Publishing Association}%
+      }
+      \strng{namehash}{5e0eb90035a139988c57f88ef692584f}
+      \strng{fullhash}{5e0eb90035a139988c57f88ef692584f}
+      \strng{fullhashraw}{5e0eb90035a139988c57f88ef692584f}
+      \strng{bibnamehash}{5e0eb90035a139988c57f88ef692584f}
+      \strng{authorbibnamehash}{5e0eb90035a139988c57f88ef692584f}
+      \strng{authornamehash}{5e0eb90035a139988c57f88ef692584f}
+      \strng{authorfullhash}{5e0eb90035a139988c57f88ef692584f}
+      \strng{authorfullhashraw}{5e0eb90035a139988c57f88ef692584f}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{2075-2180}
+      \field{journaltitle}{Electronic Proceedings in Theoretical Computer Science}
+      \field{month}{8}
+      \field{title}{Fast Classical Simulation of Quantum Circuits via Parametric Rewriting in the ZX-Calculus}
+      \field{volume}{426}
+      \field{year}{2025}
+      \field{pages}{247\bibrangedash 269}
+      \range{pages}{23}
+      \verb{doi}
+      \verb 10.4204/eptcs.426.10
+      \endverb
+      \verb{urlraw}
+      \verb http://dx.doi.org/10.4204/EPTCS.426.10
+      \endverb
+      \verb{url}
+      \verb http://dx.doi.org/10.4204/EPTCS.426.10
+      \endverb
     \endentry
     \entry{vandaele2024qubitcountoptimizationusingzxcalculus}{misc}{}{}
       \name{author}{1}{}{%
