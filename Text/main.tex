@@ -16,6 +16,7 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{makeidx}
+\usepackage{booktabs}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{proposition}{Proposition} 
@@ -570,14 +571,14 @@ where $[[\cdot]]$ represents the lineal map described by the object. Applying re
 
 For the temporal cost of simple protocols, we can use the layer slicing procedure \cite{zhou2026topolslatticesurgerycompilation}. We identify the entry nodes of the diagram (usually, the open wires in the left) and they are assigned the layer index $L = 1$. Their topological neighbours are assigned $L=2$. We propagate this process, and each vertex is assignated a layer index $L(v) = \max _{u \in \text{fathers}(v)} L(u) + 1$.  The temporal cost of an algorithm can be approximated by the maximum index in the diagram, which we will call the topological depth. \\
 
-For simple diagrams, the computation of this metric is quite straightforward, but when the protocol requires a high number of quantum gates, the complexity of the diagrams hinders the computation of its topological depth. Multi-qubit gates such as the \texttt{CNOT} or \texttt{CZ} appear as vertical lines in the ZX diagrams, amd the resolution of this ambiguity in one specific operational instantiation of the gate result in different graphs, hence altering the layer slicing procedure. Different physical realizations for the multi-qubit gates imply different topological depths. The task of reducing the rounds of error correction rounds, and hence of improving the execution time of the algorithm can be seen as an optimization problem in graph theory. We can try to formalize it by giving a more precise definition of topological depth.\\
+For simple diagrams, the computation of this metric is quite straightforward, but when the protocol requires a high number of quantum gates, the complexity of the diagrams hinders the computation of its topological depth. Multi-qubit gates such as the \texttt{CNOT} or \texttt{CZ} appear as vertical lines in the ZX diagrams, amd the resolution of this ambiguity in one specific operational instantiation of the gate result in different graphs, hence altering the layer slicing procedure. Different physical realizations for the multi-qubit gates imply different topological depths. The task of reducing the rounds of error correction rounds, and hence of improving the execution time of the algorithm can be seen as an optimization problem in graph theory. We can try to formalize it by giving a more precise definition of topological depth.
 
 \begin{definition}
     Let $G = (V,E)$ be a directed acyclic graph. We define a set of entry vertices as:
     \begin{align*}
         V_1 = \{ v \in V | in-degree(v) = 0\}
     \end{align*}
-    where the in-degree represents the number of edges directed towards $v$. For any vertex $u \in V \setminus V_1$, we define the layer index map $L: V \rightarrow \mathbb{N}$ in a recursive way:
+    where the in-degree represents the number of edges directed towards $v$. For any vertex $u \in V \setminus V_1$, we define the depth or the layer index map $L: V \rightarrow \mathbb{N}$ in a recursive way:
     \begin{align*}
         L(u) = \max\{L(v) | (v, u) \in E\} + 1
     \end{align*}
@@ -587,6 +588,29 @@ For simple diagrams, the computation of this metric is quite straightforward, bu
     \end{align*}
     
 \end{definition}
+
+When our ZX diagram has differentiated wires representing different logical qubits, we can model it as a mixed graph $G = (V, E_H, E_V)$, where $E_H$ are the horizontal edges along a wire and $E_V$ are the vertical edges for each multi-qubit gate. The fact that the vertical edges admit different physical realizations can be translated to this set up by considering $E_H$ as a set of directed edges such that they conform separate directed, non-intersecting, open paths (wires), and $E_V$ as a set of non-directed edges connecting vertices in different horizontal paths. The direction of the edges can be associated with a time-like direction, and the first vertex of each wire represents an input of the diagram, and the last vertices correspond to the outputs. The specific physical realization of the gate is an assignation of an orientation to its corresponding vertical edges. Given a mixed graph $G$, an orientation $\mathcal{O}$ is a function that assigns a direction to each $e \in E_V$. For an orientation $\mathcal{O}$ to be valid, the resulting graph $G^\mathcal{O} = (V, E_H \cup E_H^\mathcal{O})$ must be acyclic. \\
+
+Furthermore, the physical impositions of the hardware allow us to restrict the graph model further. The graph contains a finite number of wires $\{W\}_i$. Given any wire $W_1$, three vertices $u_1, u_2 \in W$ and two edges $(u_1, v_1), (u_2, v_2) \in E_V$ such that $v_1 \in W_2$, $v_2 \in W_3$ and $W_2 \neq W_3$, then if any other vertex $u_3 \in W_1$ has a vertical edge attached $(u_3, v_3) \in E_V$, then $v_3$ is either in $W_2$ or $W_3$. The restriction introduces the concept of neighbour wires, i.e., wires in the graph that may be linked with vertical edges. Other conditions can be defined for different connectivity restrictions. This model is represented in figure \ref{fig:graph_model}. The depth of a vertex $v$ can be interpreted as the longest directed path starting at any input vertex and ending at $v$.\\
+
+\begin{figure}
+    \centering
+    \input{tikz/graph_model.tex}
+    \caption{}
+    \label{fig:graph_model}
+\end{figure}
+
+Given this model for our diagrams, the time-optimization problem in a graph $G$ is solved by searching the orientation $\mathcal{O}$ that yields the minimum topological depth $D(G^\mathcal{O})$. It is clear that $D(G^\mathcal{O}) \geq D(G)$, as the length of the directed paths cannot decrease after we apply an orientation. \\
+
+In order to construct an algorithmic solution for the problem, let's consider how an specific iteration could be performed: we start reading the graph from the input vertices (in figure \ref{fig:graph_model}, from the left to the right) until we find the first vertex attached to a vertical edge $e$. The two vertices connected by this edge, $v$ and $u$ have a primitive layer index $L_{in}(u)$ and $L_{in}(v)$ respectively, determined by their preceeding horizontal edges (and, for later iterations, by their preceeding directed vertical edges too). If we direct $e$ from $u \rightarrow v$, the new depth of $v$ will be $L_{out}(v) = \max \{L_{in}(v), L_{in}(u) + 1\}$, and $L_{out}(u) = L_{in}(u)$. It is inmediate that, if $L_in{v} > L_{in}(u)$, then $L_out{v} = L_{in}(u)$. Therefore, directing the edge towards the vertex with the highest depth does not produce any change on the depth of the vertices, and hence, on the total topological depth of the graph.\\ 
+
+If we have a vertical edge connecting two vertices $(u,v)$ with $L_{in}(v) = L_{in}(u)$, we need to define a new metric $S: V \rightarrow \mathbb{N}$, which we will call the shallowness of the vertex, and it will be given by the length of the horizontal path connecting the vertex in the argument and the output vertex of the wire. For an edge $(u,v)$ with $L_{in}(v) = L_{in}(u) = k$ and, without loss of generality, $S(u) < S(v)$, let's consider the local impact of the orientation on the cost of their respective paths $L_{out}(v) + S(v)$ and $L_{out}(u) + S(u)$:
+\begin{itemize}
+    \item $u \rightarrow v$: $L_{out}(u) = k$, and the total cost of its path will be $k + S(u)$. $L_{out}(v) = k+1$ and the total cost will be $k+1 + S(v)$. The maximum local cost is $\max \{k + S(u), k + 1 + S(v)\} = k + 1 + S(v) $
+    \item $v \rightarrow u$: $L_{out}(v) = k$, and the total cost of its path will be $k + S(v)$. $L_{out}(u) = k+1$ and the total cost will be $k+1 + S(u)$. The maximum local cost is $\max \{k + S(v), k + 1 + S(u)\} = k + S(v) $
+\end{itemize}
+
+Hence, the orientation of the vertical edge should be towards the shallowest vertex. If $L_{in}(u) = L_{in}(v)$ and $R(u) = R(v)$,   Under complex structures, this rule could not provide the optimal orientation, but it will suffice for our purpose. \\
 
 For the computational implementation of the problem, we will use PyZX framework, an open source python-based library specifically designed for diagramatic reasoning in ZX calculus \cite{Kissinger_2020}. At the software architecture level, PyZX abstract the problem usin two main data-structures: circuits and graphs. \\
 
@@ -831,7 +855,7 @@ Once again, instead of using the \texttt{full\_reduce} routine, we break it into
 
 Previously, the classical control operations allowed the simplification routine to collapse the diagram to the logical identity. Now, the result of the routine can be put in a direct isomorphism with lattice surgery operations. We have a unique entry node representing the original state $\ket{\psi}_L$ encoded in a logical qubit conformed by three logical patches, and through two smooth splits we obtain three highly entangled logical qubits. By performing the projective measures on the two first qubits, and the corresponding Pauli operations on the third, we obtain the origianl state $\ket{\psi}_L$ in the last qubit. \\
 
-If we compare figures \ref{fig:teleportation3} and \ref{fig:teleportation4}, we see that the maximum layer index is reduced from 5 to 3. This represents a huge improvement in the execution time of the algorithm. Also, the pathwidth is reduced from 4 to 3, optimizing the number of logical patches necessary for the implementation. \\
+If we compare figures \ref{fig:teleportation3} and \ref{fig:teleportation4}, we see that the maximum layer index is reduced from 4 to 3. This represents a huge improvement in the execution time of the algorithm. Also, the pathwidth is reduced from 4 to 3, optimizing the number of logical patches necessary for the implementation. \\
 
  The physical interpretation presents a problem: the logical patch where we want to teleport the unknown state is originally merged in the logical qubit where that unknown state is encoded. If we want to separate the original state and the target qubit, we can find another implementation in a previous step of the simplification routine:
 
@@ -842,7 +866,7 @@ If we compare figures \ref{fig:teleportation3} and \ref{fig:teleportation4}, we 
     \label{fig:teleportation5}
 \end{figure}
 
-Now, the original state represents an independent entry wire, while the two entangled logical qubits are firstly merged and prepared in the $\ket{0}_L$ state and then separated through a smooth split. The first two qubits are then entangled. This realization of the algorithm reduces the maximum layer index from 5 to 4, and the pathwidth is not reduced. It represents a smaller optimization, but a more useful realization.
+Now, the original state represents an independent entry wire, while the two entangled logical qubits are firstly merged and prepared in the $\ket{0}_L$ state and then separated through a smooth split. The first two qubits are then entangled. This realization of the algorithm reduces the maximum layer index from 4 to 3, and the pathwidth is not reduced. It represents a smaller optimization, but a more useful realization.
 
 \subsection{CHSH Game in PyZX}
 
@@ -880,14 +904,14 @@ Bob's measurements require rotations in the $Y$ axis with angles of $\pm \pi /4$
 
 Consequently, the realization of the CHSH protocol forces the compiler to invoke magic state injection protocols \cite{robertson2025resourceallocatingcompilerlattice}, which are extremely costly, as we have already discussed. The greatest contribution to the space-time volume for this realization comes from the requirement of non-Clifford resources, not from generating the initial entanglement.\\
 
-Even so, we perform our simplification routine to each of the four possible diagrams. The procedure yields a significat reduction of Clifford gates, which, as we have already stated, does not imply a huge reduction of execution time, but it is still an optimization. 
+Even so, we perform our simplification routine to each of the four possible diagrams. The procedure yields a significat reduction of Clifford gates, which, as we have already stated, does not imply a huge reduction of execution time, but it is still an optimization. \\
 \begin{figure} [ht]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/CHSH3.png}
     \caption{Simplification of the ZX diagram for the implementation of CHSH game, corresponding to $(x,y)=(0,0)$.}
     \label{fig:CHSH3}
 \end{figure}
-The topological depth for each of the four branches is reduced from 6 to 3. The pathwidth remains the same. The traslation of the diagram to lattice surgery primitives is inmediate:
+The topological depth for each of the four branches is reduced from 5 to 3. The pathwidth remains the same. The traslation of the diagram to lattice surgery primitives is inmediate:
 \begin{itemize}
     \item We prepare a logical qubit in the state $\ket{0} + e^{i 3 \pi /2} \ket{1}$.
     \item A smooth split is performed, and then we apply a $T$ gate on Bob's qubit.
@@ -902,7 +926,7 @@ The realization in figure \ref{fig:CHSH3} could not be feasible due to the fact 
     \label{fig:CHSH4}
 \end{figure}
 
-The topological depth is reduced from 6 in figure \ref{fig:CHSH2} to 5 in figure \ref{fig:CHSH4}.
+The topological depth is reduced from 5 in figure \ref{fig:CHSH2} to 4 in figure \ref{fig:CHSH4}.
 
 \subsection{Magic Square Game in PyZX}
 
@@ -941,7 +965,45 @@ The initial preparation of the Bell pairs assume global connectivity, which is m
     \label{fig:MS3}
 \end{figure}
 
-Compared to the implementation of the CHSHS game, the Mermin-Peres games does not require the use of non-Clifford gates, thus suppressing the necessity of magic-states distillation. \\
+Compared to the implementation of the CHSHS game, the Mermin-Peres games does not require the use of non-Clifford gates, thus suppressing the necessity of magic-states distillation. The diagram has a higher number of nodes and edges, so the obtention of its topological depth requires the algorithmic approach for the orientation of vertical edges presented in the section of practical problem. This case, as well as the other eight diagrams, constitute trivial cases for the execution of the algorithm, as there are no vertical edges connecting nodes with the same depth. \\
+
+We can build some intuition of the method by looking at figure \ref{fig:MS4}. For the trivial cases where $L_{in}(u) = L_{in}(v)$, we just need to draw the vertex in an explicit layer distribution, so each of the vertical edges will be drawn as a diagonal and will be oriented in the direction of time flux.\\
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/MS4.png}
+    \caption{Visual representation of the orientation of edges for row 3 and column 0. Time flows from left to right.}
+    \label{fig:MS4}
+\end{figure}
+
+The next step is to perform the simplification routine on each diagram. The simple execution of \texttt{full\_reduce} produces graphs without possible translation to lattice surgery operations, so we once again use the escalonated simplification routine. We then select the last intermediate optimization that admits an interpretation as a physical realization of the protocol. The result for the diagram in figure \ref{fig:MS3} can ben seen in figure \ref{fig:MS5}.
+
+\begin{figure} [ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/MS5.png}
+    \caption{Simplified graph for row 3 and column 0.}
+    \label{fig:MS5}
+\end{figure}
+
+We can compare the computational cost metrics for the primitive and the optimized diagrams. The data in table \ref{tab:optimization_data} shows that the simplification method reduces the depth of our diagrams in average around an $18\%$, and the pathdwidth is reduced on average approximately in a $9\%$. Out of the 9 diagrams, 7 of them had a reduced depth once they were simplified, and 5 of them reduced their pathwidth. All the graphs improved at least one of the metrics after the optimization. 
+
+\begin{table}[ht]
+    \centering
+    \caption{Distribución de 36 datos en 4 filas y 9 columnas, con su variable.}
+    \label{tab:optimization_data}
+    \begin{tabular}{lccccccccc} 
+        \toprule
+        \textbf{Metric} & \textbf{(0,0)} & \textbf{(0,1)} & \textbf{(0,2)} & \textbf{(1,0)} & \textbf{(1,1)} & \textbf{(1,2)} & \textbf{(2,0)} & \textbf{(2,1)} & \textbf{(2,2)} \\
+        \midrule
+        Original Depth & 7  & 6  & 8  & 7  & 6  & 8  & 8  & 8  & 8  \\
+        Original Pathwidth & 6 & 6 & 6 & 6 & 6 & 6 & 6 & 6 & 7 \\
+        Optimized Depth & 5 & 6 & 6 & 6 & 6 & 6 & 6 & 6 & 7 \\
+        Optimmized Pathwidth & 5 & 5 & 6 & 5 & 5 & 6 & 6 & 6 & 6 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
 
 \newpage
 \printbibliography
