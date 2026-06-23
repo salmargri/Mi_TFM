@@ -22,6 +22,7 @@
 \usepackage{booktabs}
 \usepackage{makeidx}
 \usepackage{braket}
+\usepackage[titletoc,title]{appendix}
 % amssymb suele ser redundante o dar conflicto con stix, 
 % pero si algo te falla, puedes descomentarlo:
 % \usepackage{amssymb} 
@@ -111,6 +112,7 @@
 \usepackage{tikz-cd}
 \usetikzlibrary{quantikz2}
 \definecolor{USred}{cmyk}{0,1.00,0.65,0.34}
+\usetikzlibrary{decorations.pathreplacing, calc}
 
 % =========
 % = Otros =
@@ -247,6 +249,7 @@
     \fancyhead[RO]{\small\textsc{\MakeLowercase{\rightmark}}%
                     \quad{\normalsize\bfseries\color{USred}\thepage}}%
 }
+\usepackage{tikz-3dplot}
 \usepackage{hyperref}
 
 \begin{document}
@@ -254,38 +257,203 @@
 \maketitle
 
 \frontmatter
+
+\chapter*{Declaración de Originalidad}
+
+D. Salvador Márquez Grima, con DNI 45996267Q, garantiza con su firma que en la realización del TFM de título Quantum Protocols for Topological Codes with ZX Calculus se han respetado los derechos de otros autores a ser citados cuando se han utilizado sus resultados o publicaciones.
+
+\vspace{2cm}
+\begin{flushright}
+En Granada, a 23 de junio de 2026\\[2cm]
+\rule{6cm}{0.4pt}\\ % Línea para la firma
+\vspace{0.2cm}
+\textbf{Salvador Márquez Grima}
+\end{flushright}
+
 \tableofcontents
 
 \mainmatter
 
 
-\chapter*{English Abstract}
-\addcontentsline{toc}{chapter}{English Abstract}
-\markright{English Abstract}
+\section*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\markright{Abstract}
 
+    The extreme fragility of quantum information against decoherence demands the development of fault-tolerant quantum computing architectures. Among the most promising proposals, we find topological codes, such as the planar surface code, whose physical constraints of two-dimensional nearest-neighbour connectivity as well as the transversality condition impose the use of lattice surgery techniques for the execution of multi-qubit logical operations. Given that the standard circuit model is structurally deficient in capturing the non-unitary dynamics of lattice surgery, we adopt ZX calculus as a unifying framework. To justify said framework, quantum protocols such as quantum teleportation, the CHSH non-local game, and the Mermin-Peres Magic Square game, are computationally implemented and verified using the PyZX library. The validation of those protocols, as well as their optimization, is obtained from the iterative application of simplification routines based on the theory of ZX calculus.
 
-
-\begin{otherlanguage}{english}
-    According to the guidelines, every dissertation should include a short english abstract at the beginning. In the abstract, you describe in general terms what is your dissertation about, the main points you want to make, and any important consequences that may arise.
-\end{otherlanguage}
+\section*{Resumen}
+   La extrema fragilidad de la información cuántica frente a la decoherencia exige el desarrollo de arquitecturas de computación cuántica tolerantes a fallos. Entre las propuestas más prometedoras destacan los códigos topológicos, como el código de superficie planar, cuyas restricciones físicas de conectividad bidimensional a primeros vecinos (2DNN), junto con la condición de transversalidad, imponen el uso de técnicas de cirugía de red (lattice surgery) para la ejecución de operaciones lógicas multi-qubit. Dado que el modelo de circuitos estándar resulta estructuralmente deficiente para capturar la dinámica no unitaria inherente a la cirugía de red, se adopta el cálculo ZX como un marco unificador. Para justificar dicho marco, se han implementado y verificado computacionalmente protocolos cuánticos —tales como la teleportación cuántica, el juego no local CHSH y el juego del Cuadrado Mágico de Mermin-Peres— empleando la librería PyZX. La validación de estos protocolos, así como su optimización, se obtiene a partir de la aplicación iterativa de rutinas de simplificación fundamentadas en la teoría del cálculo ZX.
 
 \chapter{Introduction}
 
 The theory of quantum error correction has not always been a major field inside quantum computation \cite{Kastoryano2018}. The theoretical landscape shifted when Peter Shor introduced his factoring algorithm, where the profound algorithmic breakthrough faced the skepticism of contemporary physicists about the physical viability of quantum computers. This skepticism was entirely justified, as quantum states are notoriously fragile, and the prospect of building a large-scale quantum system with sufficiently low error rates was regarded as impossible.
 
-Classical error correction protocols inherently rely on redundancy, usually achieved by copying information into ancillary bits and applying methods like the majority voting procedures \cite{Girvin2023}. The principles of quantum mechanics strictly forbid this approach, as the no-cloning theorem states that an unknown quantum state cannot be duplicated. Furthermore, classical error correction requires accessing the state of the system, while in a quantum systems the measurement would imply the collapse of the wavefunction and hence the loss of quantum information. Finally, while classical errors are completely discrete, quantum errors are continuous transformations, which certainly implies a higher difficulty to recover the state prior to the error.
+Classical error correction protocols inherently rely on redundancy, usually achieved by copying information into ancillary bits and applying methods like the majority voting procedures \cite{Girvin2023}. The principles of quantum mechanics strictly forbid this approach, as the no-cloning theorem states that an unknown quantum state cannot be duplicated. Furthermore, classical error correction requires accessing the state of the system, while in a quantum system the measurement would imply the collapse of the wavefunction and hence the loss of quantum information. Finally, while classical errors are completely discrete, quantum errors are continuous transformations, which certainly implies a higher difficulty to recover the state prior to the error.
 
 The paradigm drastically transformed in the mid-1990s, as Peter Shor \cite{PhysRevA.102.022406} and Andrew Steane \cite{steane1996} discovered the first quantum error-correcting codes, based on the application of specific multi-qubit operators that always yield binary results. This allowed the continuum of possible errors to collapse into a discrete set of correctable faults without accessing the state of the system.
 
-The field of quantum error correction has developed towards the paradigm of fault-tolerant quantum computing, i.e., the design of large-scale quantum processors capable of performing quantum error correction procedures to achieve arbitrarily low error rates. The foundational principles of building reliable logical systems from inherently unreliable physical components with the study of structure invariants were established in the mid-20th century. Notably, Joyn von Neumann's work on probabilistic loics and the synthesis of reliable macroscopic automata from unreliable components \cite{neumann56probabilistic}, as well as Moore and Shannon's construction of reliable circuits using less reliable relays \cite{shannon1938symbolic}.
+The field of quantum error correction has developed towards the paradigm of fault-tolerant quantum computing, i.e., the design of large-scale quantum processors capable of performing quantum error correction procedures to achieve arbitrarily low error rates. The foundational principles of building reliable logical systems from inherently unreliable physical components with the study of structure invariants were established in the mid-20th century. Notably, John von Neumann's work on probabilistic logics and the synthesis of reliable macroscopic automata from unreliable components \cite{neumann56probabilistic}, as well as Moore and Shannon's construction of reliable circuits using less reliable relays \cite{shannon1938symbolic}.
 
-As classical computational demands grew, the necessity to managge increasing physical complexity produced the Very Large-Scale Integration (VLSI) revolution, pioneered bby methodologies such as the Mead-Conway design rules \cite{mead1980introduction}, allowing engineers to abstract the physical components into standarized logical cells. The separation of the logical kernel from the physical layout enables a massive reorganization of computational workflows. Today, fault-tolerant quantum computing is underoing an analogous historical transition, as the research shifts from the strictly empirical approach to a tightly interated technology-design co-optimization methodology.
+As classical computational demands grew, the necessity to manage increasing physical complexity produced the Very Large-Scale Integration (VLSI) revolution, pioneered by methodologies such as the Mead-Conway design rules \cite{mead1980introduction}, allowing engineers to abstract the physical components into standardised logical cells. The separation of the logical kernel from the physical layout enables a massive reorganization of computational workflows. Today, fault-tolerant quantum computing is undergoing an analogous historical transition, as the research shifts from the strictly empirical approach to a tightly integrated technology-design co-optimization methodology.
 
 The goal of the present work is completely framed inside this transition. Specifically, we want to implement ZX calculus, a tool for diagrammatic reasoning, as a compiler for quantum protocols in fault-tolerant architectures. 
 
-The thesis will be structured as follows. First, in chapter \ref{ch:IQC}, we will review some basic concepts about quantum computation, building the foundational basis for the discussion later. In chapter \ref{ch:QEC}, we will give a broad overview of the theory of quantum error correction, as well as the approach for the encoding of logical qubits represented in the stabilizer codes. Chapter \ref{ch:TQEC} will show how stabilizer formalism and the homological approach of algebraic topology allow for the construction of an specific family of quantum error-correcting codes, of enormous relevance in current fault-tolerant quantum computing. Later, in chapter \ref{ch:LS} we will present how we can implement multi-qubit gates acting on the logical qubits defined in the previous chapter, and how this set of operations is naturally captured by ZX calculus in chapter \ref{ch:ZXC}. Finally, chapter \ref{ch:PP} presents the practical problem, the technical details of the implementation using the python library PyZX, and chapter \ref{ch:Results} show the results of said practical problem.
+The thesis will be structured as follows. First, in chapter \ref{ch:IQC}, we will review some basic concepts about quantum computation, building the foundational basis for the discussion later. In chapter \ref{ch:QEC}, we will give a broad overview of the theory of quantum error correction, as well as the approach for the encoding of logical qubits represented in the stabilizer codes. Chapter \ref{ch:TQEC} will show how stabilizer formalism and the homological approach of algebraic topology allow for the construction of a specific family of quantum error-correcting codes, of enormous relevance in current fault-tolerant quantum computing, as they respect strict two-dimensional nearest-neighbour connectivity between physical qubits. Later, in chapter \ref{ch:LS} we will present how we can implement multi-qubit gates acting on the logical qubits defined in the previous chapter, and how this set of operations is naturally captured by ZX calculus in chapter \ref{ch:ZXC}. Finally, chapter \ref{ch:PP} presents the practical problem, the technical details of the implementation using the python library PyZX, and chapter \ref{ch:Results} show the results of said practical problem.
 
 \chapter{Introduction to Quantum Computation} \label{ch:IQC}
+
+While in classical computation bits, the basic unit of classical information, take two possible values (0 or 1), quantum computation relies on a basic unit of information, called the qubit, that exhibits quantum behaviour \cite{NielsenChuang2010}. In contrast to the bit, the state of a qubit can be described as a superposition of the two states of the computational basis, conventionally denoted $\ket{0}$ and $\ket{1}$, so the state of a qubit is given by:
+\begin{equation} \label{qubit}
+    \ket{\psi} = \alpha \ket{0} + \beta \ket{1} =
+    \begin{bmatrix}
+    \alpha \\
+    \beta
+    \end{bmatrix}
+    , \quad \alpha, \beta \in \mathbb{C}, \quad |\alpha|^2 + |\beta|^2 = 1
+\end{equation}
+
+Therefore, the state of a qubit is described by a vector in a two-dimensional complex vector space. While we can access the information stored in a classical bit at any time, quantum mechanics impose a restriction for the case of the qubit. Foremost, when we make a measurement (in the computational basis) we do not obtain $\ket{\psi}$, but rather one of the eigenvalues of $\ket{0}$ or $\ket{1}$, with probabilities $|\alpha|^2$ and $|\beta|^2$ respectively. Furthermore, the result of the measurement also determines the collapse of the physical state of the qubit into one of the vectors of the computational basis, meaning that if we measure the qubit and obtain the eigenvalue corresponding to $\ket{0}$, the complete state of the qubit is now $\ket{\psi} = \ket{0}$. The probabilistic characterisation of measurement introduces a non-deterministic element in the dynamics of the qubit, and therefore in quantum computation in general.
+
+Because $|\alpha|^2 + |\beta|^2 = 1$, one may rewrite equation \ref{qubit} as:
+
+\begin{equation} \label{qubit2}
+    \begin{aligned}
+        \ket{\psi} &= e^{i\gamma} \cos \frac{\theta}{2} \ket{0} + e^{i(\varphi+\gamma)} \sin \frac{\theta}{2} \ket{1} \\
+        &= e^{i\gamma} \left(\cos \frac{\theta}{2} \ket{0} + e^{i\varphi} \sin \frac{\theta}{2} \ket{1} \right)
+    \end{aligned}
+\end{equation}
+
+The overall phase factor does not have any observable effect, so it can be ignored. Hence, the state is described by:
+\begin{equation} \label{qubit3}
+    \ket{\psi} = \cos \frac{\theta}{2} \ket{0} + e^{i\varphi} \sin \frac{\theta}{2} \ket{1} 
+\end{equation}
+
+A very visual way to illustrate the state of a qubit is by using angles $\theta$ and $\varphi$ to represent a point in a three-dimensional sphere, known as the Bloch sphere, as shown in figure \ref{fig:bloch}.
+
+\begin{figure}[ht]
+    \centering    
+    \tdplotsetmaincoords{70}{110}
+    \begin{tikzpicture}[scale=3, tdplot_main_coords, >=stealth]
+
+        \def\thetavec{45}
+        \def\phivec{50}  
+
+        \tdplotsetcoord{P}{1}{\thetavec}{\phivec}
+
+        \draw[tdplot_screen_coords, thin, gray!80] (0,0) circle (1);
+
+        \tdplotdrawarc[dashed, gray!80]{(0,0,0)}{1}{0}{360}{}{}
+
+        \draw[thick,->] (0,0,0) -- (1.4,0,0) node[anchor=north east]{$x$};
+        \draw[thick,->] (0,0,0) -- (0,1.4,0) node[anchor=north west]{$y$};
+        \draw[thick,->] (0,0,-1.1) -- (0,0,1.4) node[anchor=south]{$z \equiv |0\rangle$};
+        \node[anchor=north] at (0,0,-1) {$-z \equiv |1\rangle$};
+
+        \draw[thick, ->, blue] (0,0,0) -- (P) node[anchor=south west, black] {$|\psi\rangle$};
+
+        \draw[dashed, thin] (0,0,0) -- (Pxy);
+        \draw[dashed, thin] (P) -- (Pxy);
+
+        \tdplotdrawarc[->, red, thick]{(0,0,0)}{0.35}{0}{\phivec}{anchor=north}{$\varphi$}
+
+        \tdplotsetthetaplanecoords{\phivec}
+        
+        \tdplotdrawarc[tdplot_rotated_coords, ->, red, thick]{(0,0,0)}{0.4}{0}{\thetavec}{anchor=south west}{$\theta$}
+
+    \end{tikzpicture}
+    \caption{Bloch Sphere}
+    \label{fig:bloch}
+\end{figure}
+
+The representation of more complex information requires several qubits. A state of $N$ qubits lives in a vector space defined as the tensor product of the $N$ two-dimensional Hilbert spaces corresponding to each individual qubits, producing a $2^N$ Hilbert space with a basis given by:
+
+\begin{align*}
+    \underbrace{\ket{0} \otimes \cdots \otimes \ket{0}}_{N} =& \ket{\underbrace{0 \cdots 00}_{N}} \\
+    \underbrace{\ket{0} \otimes \cdots \otimes \ket{1}}_{N} =& \ket{\underbrace{0 \cdots 01}_{N}} \\
+    \vdots& \\
+    \underbrace{\ket{1} \otimes \cdots \otimes \ket{1}}_{N} =& \ket{\underbrace{1 \cdots 11}_{N}}
+\end{align*}
+
+A quantum computer is composed by qubits and quantum gates, unitary operations which enable the manipulation of qubits. A computation can be depicted in the standard circuit model as the preparation of initial states, sequential application of quantum gates and measurements. Some quantum gates of interest are described in table \ref{tab:quantum_gates}.
+
+\begin{table}[h!]
+    \centering
+    \renewcommand{\arraystretch}{2.2} 
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Gate Name} & \textbf{Symbol} & \textbf{Matrix representation} \\
+        \hline
+        
+        Pauli-X & 
+        \begin{quantikz}
+            \qw & \gate{X} & \qw
+        \end{quantikz} & 
+        % Reiniciamos el arraystretch a 1 solo para esta matriz
+        $\renewcommand{\arraystretch}{1} \begin{bmatrix} 0 & 1 \\ 1 & 0 \end{bmatrix}$ \\
+        \hline
+        
+        Pauli-Z & 
+        \begin{quantikz}
+            \qw & \gate{Z} & \qw
+        \end{quantikz} & 
+        $\renewcommand{\arraystretch}{1} \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix}$ \\
+        \hline
+        
+        Hadamard & 
+        \begin{quantikz}
+            \qw & \gate{H} & \qw
+        \end{quantikz} & 
+        $\renewcommand{\arraystretch}{1} \frac{1}{\sqrt{2}}\begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}$ \\
+        \hline
+        
+        CNOT & 
+        \begin{quantikz}
+            \qw & \ctrl{1} & \qw \\
+            \qw & \targ{} & \qw
+        \end{quantikz} & 
+        $\renewcommand{\arraystretch}{1} \begin{bmatrix} 
+            1 & 0 & 0 & 0 \\ 
+            0 & 1 & 0 & 0 \\ 
+            0 & 0 & 0 & 1 \\ 
+            0 & 0 & 1 & 0 
+        \end{bmatrix}$ \\
+        \hline
+        
+        S Gate & 
+        \begin{quantikz}
+            \qw & \gate{S} & \qw
+        \end{quantikz} & 
+        $\renewcommand{\arraystretch}{1} \begin{bmatrix} 1 & 0 \\ 0 & i \end{bmatrix}$ \\
+        \hline
+        
+        % T Gate
+        T Gate & 
+        \begin{quantikz}
+            \qw & \gate{T} & \qw
+        \end{quantikz} & 
+        $\renewcommand{\arraystretch}{1} \begin{bmatrix} 1 & 0 \\ 0 & e^{i\pi/4} \end{bmatrix}$ \\
+        \hline
+        
+    \end{tabular}
+    \caption{Relevant quantum gates.}
+    \label{tab:quantum_gates}
+\end{table}
+
+A gate can be represented as a matrix, and its action on a quantum state is computed by multiplying said matrix with the column vector representation of the state. The total action of a circuit is obtained by the sequential execution of matrix multiplications. 
+
+Standard circuit model graphically represents each qubit as a horizontal wire, with quantum gates acting on them depicted as symbols on the corresponding wire. Time flows from left to right, thus determining the order in which the operations are executed. A simple example of a quantum circuit can be seen in figure \ref{fig:quantum_circuit}.
+
+\begin{figure} [h!]
+    \centering
+\begin{quantikz}
+    \lstick{$\ket{0}$} & \gate{A} & \ctrl{1} & \meter{} \\
+    \lstick{$\ket{0}$} & \qw      & \gate{B} & \meter{} 
+\end{quantikz}
+\caption{Example quantum circuit. Two qubits are prepared in the $\ket{0}$ state. Gate $A$ acts on the first qubit. Then a controlled $B$ gate is executed, where qubit 1 acts as control and qubit 2 acts as target. Finally, measurements in the computational basis are performed.}
+\label{fig:quantum_circuit}
+\end{figure}
+
+A set of gates is said to be universal if any unitary operation may be approximated to an arbitrary accuracy by some sequence of operations in this set.
 
 \chapter{Quantum Error Correction} \label{ch:QEC}
 
@@ -294,7 +462,7 @@ The main challenge of quantum computation is the fragility of the physical syste
 \section{Overview and Simple Codes}
 \label{OverviewQEC}
 
-Fathoming the differences between classical and quantum error-corecting codes makes it necessary to pay attention to three difficulties that arise when we deal with quantum systems: The no-cloning theorem,, which prevents us from duplicating the state of a qubit; the continuous nature of errors; and the fact that observation in quantum mechanics collapses the wave function in one of the eigenstates of the measured observable (this is a non-unitary process, and thus recovery is impossible). 
+Fathoming the differences between classical and quantum error-correcting codes makes it necessary to pay attention to three difficulties that arise when we deal with quantum systems: The no-cloning theorem, which prevents us from duplicating the state of a qubit; the continuous nature of errors; and the fact that observation in quantum mechanics collapses the wave function in one of the eigenstates of the measured observable. 
 
 In order to overcome these difficulties, quantum error-correcting codes (QECC) utilize entanglement to encode a logical qubit across a multi-qubit system. This way, we can protect quantum information through redundancy, without violating the no-cloning theorem. QEC protocols measure multi-qubit parity operators (error syndromes), avoiding the collapse of the wave function. The continuity problem will be confronted by discretizing the errors into a finite set of Pauli operations.
 
@@ -307,7 +475,7 @@ Consider that we have physical qubits that are subject to random bit-flip errors
     \ket{1_L} = \ket{111}
 \end{align*}
 
-If the bit-flip error occurs in any qubit, we can diagnose this error without destroying the superposition by measuring the parity observables $Z_1 Z_2$ and $Z_2 Z_3$. Those observables compare the parities of their corresponding qubits, yielding a $\pm 1$ eigenvalue, positive if both compared qubits share the same state, negative if they are different. It is crucial to note that the measurement of the parity operators commutes with the logical operators, ensuring that the superposition remains intact. Once we have detected the error, we can apply the appropiate recovery operation. 
+If the bit-flip error occurs in any qubit, we can diagnose this error without destroying the superposition by measuring the parity observables $Z_1 Z_2$ and $Z_2 Z_3$. Those observables compare the parities of their corresponding qubits, yielding a $\pm 1$ eigenvalue, positive if both compared qubits share the same state, negative if they are different. It is crucial to note that the measurement of the parity operators commutes with the logical operators, ensuring that the superposition remains intact. Once we have detected the error, we can apply the appropriate recovery operation. 
 
 This same procedure can be adapted to protect against phase-flip errors, modeled by the Pauli $Z$ operator. This is performed by applying a Hadamard transformation to each qubit after applying two sequential \texttt{CNOT} gates. It is an identical procedure, and it only differs in the basis we are working with. 
 
@@ -356,7 +524,7 @@ Now we want to generalize the basic ideas present in the Shor code to give a sim
 
 When we project our state into the code subspace, we are essentially restricting the degrees of freedom of the system. This means that if our original Hilbert space for $n$ physical qubits is $2^n$-dimensional, the code subspace will be $2^k$-dimensional, where $k < n$. We will call $C$ a $[n,k]$ code, as we are encoding $k$ logical qubits into $n$ physical qubits. Once the noise acts on the encoded state $\ket{\psi_L}$, the system will be pushed into a different subspace. Specifically, each error $E_\alpha$ projects the state into an error subspace $C_\alpha = E_\alpha C$. Each error subspace has its corresponding projector $P_\alpha = E_\alpha P E_\alpha^\dagger$. 
 
-If, given a code, each error corresponds to different undeformed and orthogonal subspaces, then we can reliably distinguish which error has occurred. This will be achieved by performing the set of projective measurements associated with each error subspace. Given our noisy state $E_\alpha \ket{\psi_L}$, the execution of a projector $P_\beta$ will yield us a syndrome lecture $\beta$ with probability $p_\beta = \bra{\psi_L} E_\alpha^\dagger P_\beta E_\alpha \ket{\psi_L}$. The orthogonality of error subspaces ensures that the measurement associated to an error subspace $C_\beta$ will only yield a non-zero probability when the corresponding error has occurred. 
+If, given a code, each error corresponds to different undeformed and orthogonal subspaces, then we can reliably distinguish which error has occurred. This will be achieved by performing the set of projective measurements associated with each error subspace. Given our noisy state $E_\alpha \ket{\psi_L}$, the execution of a projector $P_\beta$ will yield us a syndrome reading $\beta$ with probability $p_\beta = \bra{\psi_L} E_\alpha^\dagger P_\beta E_\alpha \ket{\psi_L}$. The orthogonality of error subspaces ensures that the measurement associated to an error subspace $C_\beta$ will only yield a non-zero probability when the corresponding error has occurred. 
 
 The undeformed condition means that, if you have two perfectly distinguishable (orthogonal) states $\ket{\psi_L}$ and $\ket{\phi_L}$ in the code subspace, then the error $E_\alpha$ must not make them non orthogonal. This is equivalent to saying that the inner product of the two states must be preserved under the action of the error, that is, $\bra{\psi_L} E_\alpha^\dagger E_\alpha \ket{\phi_L} = \bra{\psi_L} \ket{\phi_L} = 0$. This ensures that the recovery operation can correctly restore the original encoded state. 
 
@@ -427,11 +595,11 @@ The proof of the Knill-Laflamme condition explicitly provides a method to constr
 
 \section{Stabilizer Codes}
 
-The previous discussion has proven the theoretical possibility of quantum error correction. However, the state-vector representation of quantum states carries a practical impossibility. When we have a a large number $n$ of physical qubits, the manipulation of the $2^n$-dimensional state vector becomes unfeasible. We need a more efficient way to represent quantum states, and the stabilizer formalism provides us with such a tool, as well as a method to construct QECC. \\
+The previous discussion has proven the theoretical possibility of quantum error correction. However, the state-vector representation of quantum states carries a practical impossibility. When we have a large number $n$ of physical qubits, the manipulation of the $2^n$-dimensional state vector becomes unfeasible. We need a more efficient way to represent quantum states, and the stabilizer formalism provides us with such a tool, as well as a method to construct QECC. \\
 
 \subsection{Stabilizer Formalism}
 
-If we take a closer look at the Shor code, and specifically at the syndrome measurement, we can see that in order to detect a bit flip on one of the first three qubits, we measured the eigenvalues of the operators $Z_1 Z_2$ and $Z_2 Z_3$. The same procedure should be performed for the other two blocks of three qubits. In order to detect phase-flip errors, we need to measure the eigenvalues of the operators $X_1 X_2 X_3 X_4 X_5 X_6$ and $X_4 X_5 X_6 X_7 X_8 X_9$. In total, we need to measure the eigenvalues of eight operators.The two valid codewords, $\ket{0_L}$ and $\ket{1_L}$, are the eigenstates of all these operators with eigenvalue +1, and hence are simulatenously fixed by any of them. Those are called stabilizer operators, and the basic idea of the formalism is to describe the code space as the subspace stabilized by these operators. 
+If we take a closer look at the Shor code, and specifically at the syndrome measurement, we can see that in order to detect a bit flip on one of the first three qubits, we measured the eigenvalues of the operators $Z_1 Z_2$ and $Z_2 Z_3$. The same procedure should be performed for the other two blocks of three qubits. In order to detect phase-flip errors, we need to measure the eigenvalues of the operators $X_1 X_2 X_3 X_4 X_5 X_6$ and $X_4 X_5 X_6 X_7 X_8 X_9$. In total, we need to measure the eigenvalues of eight operators.The two valid codewords, $\ket{0_L}$ and $\ket{1_L}$, are the eigenstates of all these operators with eigenvalue +1, and hence are simultaneously fixed by any of them. Those are called stabilizer operators, and the basic idea of the formalism is to describe the code space as the subspace stabilized by these operators. 
 
 In order to give a more precise description of the stabilizer formalism, let's introduce the $n$-dimensional Pauli group $\mathcal{P}_n$, which is the group generated by the $n$-fold tensor products of the Pauli matrices and the identity, together with the multiplicative factors $\pm 1$ and $\pm i$. For instance, the 1-dimensional Pauli group is 
 
@@ -444,7 +612,7 @@ It is easily verifiable that $\mathcal{P}_n$ is a group under matrix multiplicat
     C(\mathcal{S}) \equiv \{ \ket{\psi} \in \mathcal{H} : g \ket{\psi} = \ket{\psi}; \ \forall g \in \mathcal{S} \}
 \end{align*}
 
-It is also obvious that the code space $C(\mathcal{S})$ is indeed a vector space. $\mathcal{S}$ is necessarily an Abelian subgroup, since two non-conmuting operators cannot have common eigenstates. 
+It is also obvious that the code space $C(\mathcal{S})$ is indeed a vector space. $\mathcal{S}$ is necessarily an Abelian subgroup, since two non-commuting operators cannot have common eigenstates. 
 
 Let's recall that our aim is to define a subspace $C$ of the total Hilbert space, such that it encodes $k$ logical qubits into $n$ physical qubits. Therefore, the dimension of $C$ must be $2^k$. We want to see how this condition translates on the definition of the stabilizer $\mathcal{S}$:
 
@@ -486,7 +654,7 @@ $-I \notin \mathcal{S}$ ensures that there are no elements of $\mathcal{S}$ with
 
 Therefore, a code that encodes $k$ logical qubits into $n$ physical qubits can be defined by a stabilizer $\mathcal{S}$ with $n-k$ independent generators. This proposition also provides a reason for the non-inclusion of $-I$ in the stabilizer. This is nonetheless obvious from the fact that the only solution to $-I\ket{\psi} = \ket{\psi}$ is the trivial solution $\ket{\psi} = 0$.
 
-\subsection{Unitary Dynamics of Stabilizer Codes and the Gottessman-Knill Theorem}
+\subsection{Unitary Dynamics of Stabilizer Codes and the Gottesman-Knill Theorem}
 
 We have discussed the description of a subspace using stabilizer formalism. Now let's see how we can describe the dynamics of those subspaces under the action of noise and other quantum processes. Let $\ket{\psi}$ be an element of a code space $C(\mathcal{S})$ stabilized by $\mathcal{S}$. If we apply a unitary operation $U$,
 \begin{align}
@@ -526,7 +694,7 @@ The Clifford group is not universal for quantum computation, and thus the Gottes
 
 Now that we have established the stabilizer formalism, we can explicitly describe how a stabilizer code detects and corrects errors in a remarkably elegant way. \cite{Gottesman1997}\\
 
-Let $C(\mathcal{S})$ be an $[n, k]$ stabilizer code defined by the stabilizer group $\mathcal{S} = \langle g_1, g_2, \ldots, g_{n-k} \rangle$. A valid encoded state $\ket{\psi_L} \in C(\mathcal{S})$ satisfies $g_i \ket{\psi_L} = \ket{\psi_L}$ for all $i \in \{1, \dots, n-k\}$. \\
+Let $C(\mathcal{S})$ be a $[n, k]$ stabilizer code defined by the stabilizer group $\mathcal{S} = \langle g_1, g_2, \ldots, g_{n-k} \rangle$. A valid encoded state $\ket{\psi_L} \in C(\mathcal{S})$ satisfies $g_i \ket{\psi_L} = \ket{\psi_L}$ for all $i \in \{1, \dots, n-k\}$. \\
 
 Suppose an arbitrary error occurs. As discussed in Section \ref{OverviewQEC}, we can discretize errors by expanding them in the basis of the Pauli group $\mathcal{P}_n$. Thus, we only need to consider what happens when a Pauli error $E \in \mathcal{P}_n$ corrupts our state, transforming it into $E \ket{\psi_L}$. To detect the error without measuring the logical state (which would destroy the quantum information), we measure the $n-k$ stabilizer generators $g_i$. 
 
@@ -553,7 +721,7 @@ We have discussed how encoding quantum information into a subspace can protect t
 
 Multi-qubit gates carry the risk of propagating errors from one physical qubit to another. The reiterative application of such operations can produce a single physical hardware failure to cascade into a large number of errors on the physical qubits encoding the logical state. If the weight of the resulting error exceeds the distance $d$ of the code, the error correction procedure will fail. Therefore, the design of fault-tolerant quantum circuits must ensure that errors do not propagate in a way that exceeds the error-correcting capabilities of the code. 
 
-We can prevent catastrophical error propagation by imposing the condition of transversality on the implementation of logical gates. A transversal gate is one that can be implemented by applying independent physical operations exclusively between corresponding physical qubits in different code blocks. This architectural method ensures that a single physical error propagates to at most one physical qubit in each code block, thus maintaining the error weight within the correctable treshold of the code. This may seem like a very simple condition, but it has a profound limitation \cite{Eastin2009}:
+We can prevent catastrophic error propagation by imposing the condition of transversality on the implementation of logical gates. A transversal gate is one that can be implemented by applying independent physical operations exclusively between corresponding physical qubits in different code blocks. This architectural method ensures that a single physical error propagates to at most one physical qubit in each code block, thus maintaining the error weight within the correctable threshold of the code. This may seem like a very simple condition, but it has a profound limitation \cite{Eastin2009}:
 
 \begin{theorem}[Eastin-Knill]
 No local quantum error-correcting code can implement a universal set of logical gates transversally.
@@ -561,19 +729,19 @@ No local quantum error-correcting code can implement a universal set of logical 
 
 This theorem implies that the implementation of transversal gates alone does not suffice to achieve universal fault-tolerant quantum computation. For the QECC we will be interested, the set of gates that can be implemented transversally are exactly the Clifford gates \cite{Bravyi_2013}
 
-If we want universal quantum computation with transversal gates, the barrier imposed by the Eastin-Knill theorem can surpassed through magic state injection \cite{Bravyi_2005}, which enables the transversal execution of a $T$ gate (Clifford+$T$ is a universal set of quantum gates). This is performed by the preparation and injection of a magic state $\ket{T}$ which, via the execution of Clifford gates, consumes this resource and executes a $T$ gate on the data qubit. For the preparation of said states, the method of maggic state distillation is used. The method consists on the "purification" of a certain number of copies of a mixed state, and, altough we are not interested now in the specific realisation of the method, we should not that it is an expensive procedure in terms of its computational cost.
+If we want universal quantum computation with transversal gates, the barrier imposed by the Eastin-Knill theorem can be surpassed through magic state injection \cite{Bravyi_2005}, which enables the transversal execution of a $T$ gate (Clifford+$T$ is a universal set of quantum gates). This is performed by the preparation and injection of a magic state $\ket{T}$ which, via the execution of Clifford gates, consumes this resource and executes a $T$ gate on the data qubit. For the preparation of said states, the method of magic state distillation is used. The method consists of the "purification" of a certain number of copies of a mixed state, and, although we are not interested now in the specific realisation of the method, we should note that it is an expensive procedure in terms of its computational cost.
 
 \section{CSS Codes}
 
-A classical linear code $C$ $[n,k]$ is a vector subspace of dimension $k$ inside the binary vector space $\mathbb{Z}^n_2$. It is generated by a $k \times  n$ matrix $G$ whose rows are a basis in $C$. They codify a logical message $x \in \mathbb{Z}^k_2$ in a codeword $v \in \mathbb{Z}^n_2$ via the operation $v = G x$. An equivalent way of defining the linear code is with the parity check matrices, which provides a more useful description in terms of error correction. An $[n,k]$ code is defined as the subspace containing all vectors $x$ in $\mathcal{Z}^n_2$ such that $Hx = 0$, where $H$ is an $n-k$ by $n$ matrix known as the parity check matrix, with entries in $\mathbb{Z}_2$. Given a code $C$, there exists a dual code $C^\perp$, given by
+A classical linear code $C$ $[n,k]$ is a vector subspace of dimension $k$ inside the binary vector space $\mathbb{Z}^n_2$. It is generated by a $k \times  n$ matrix $G$ whose rows are a basis in $C$. They codify a logical message $x \in \mathbb{Z}^k_2$ in a codeword $v \in \mathbb{Z}^n_2$ via the operation $v = G x$. An equivalent way of defining the linear code is with the parity check matrices, which provides a more useful description in terms of error correction. A $[n,k]$ code is defined as the subspace containing all vectors $x$ in $\mathbb{Z}^n_2$ such that $Hx = 0$, where $H$ is an $n-k$ by $n$ matrix known as the parity check matrix, with entries in $\mathbb{Z}_2$. Given a code $C$, there exists a dual code $C^\perp$, given by
 \begin{align*}
-    C^\perp = \{w \in \mathcal{Z}^2_n \ | \ v \cdot w^\perp =0, \ \forall v \in C\}
+    C^\perp = \{w \in \mathbb{Z}^n_2 \ | \ v \cdot w^\perp =0, \ \forall v \in C\}
 \end{align*}
-The construction of a CSS (Caldernbank-Shor-Steane) code \cite{steane1996} requires two classical linear codes $C_1$ (a $[n, k_1]$ code) and $C_2$ (a $[n, k_2]$ code), which must satisfy $C_2 \subset C_1$. The dimension of the quotient subspace $C_1 / C_2$ is $k_1 - k_2$. This defines the dimension of our code subspace, as its elements will be constructed as the following coherent superposition:
+The construction of a CSS (Calderbank-Shor-Steane) code \cite{steane1996} requires two classical linear codes $C_1$ (a $[n, k_1]$ code) and $C_2$ (a $[n, k_2]$ code), which must satisfy $C_2 \subset C_1$. The dimension of the quotient subspace $C_1 / C_2$ is $k_1 - k_2$. This defines the dimension of our code subspace, as its elements will be constructed as the following coherent superposition:
 \begin{align}
     \ket{x + C_2} = \frac{1}{|C_2|} \sum_{y \in C_2} \ket{x + y}
 \end{align}
-where $x$ is an element of $C_1$. Supressing the global phase, any operator in $mathcal{P}_n$ can be mapped to a binary vector of $2n$ components $(u|v) \in \mathbb{Z}^{2n}_2$, where $u \in \mathbb{Z}^n_2$ codifies the support of the $X$ matrices and $v \in \mathbb{Z}^N_2$ codifies the support of the $Z$ matrices. Given a state $\ket{z}$ defined by the vector $z \in \mathbb{Z}^N_2$, a stabilizer $Z(u)$ defined by $u \in \mathbb{Z}^N_2$ acts on $\ket{z}$ as
+where $x$ is an element of $C_1$. Suppressing the global phase, any operator in $mathcal{P}_n$ can be mapped to a binary vector of $2n$ components $(u|v) \in \mathbb{Z}^{2n}_2$, where $u \in \mathbb{Z}^n_2$ codifies the support of the $X$ matrices and $v \in \mathbb{Z}^N_2$ codifies the support of the $Z$ matrices. Given a state $\ket{z}$ defined by the vector $z \in \mathbb{Z}^N_2$, a stabilizer $Z(u)$ defined by $u \in \mathbb{Z}^N_2$ acts on $\ket{z}$ as
 \begin{align*}
     Z(u) \ket{z} = (-1)^{(u \cdot z)} \ket{z}
 \end{align*}
@@ -583,7 +751,7 @@ For $\ket{z}$ to be stabilized by $Z(u)$, the exponent must be an even number an
     X(v) \ket{x} = \ket{x + v} 
 \end{align*}
 
-A state stabilized by $X(v)$ must be a coherent superposition of states $\ket{x} + \ket{v}$. Therefore, if we construct a matrix $H_X$ such that every row of the matrix stabilizes elements of a certain subspace $C_2$, this susbspace is constituted by coherent superpositions of vectors $\ket{x} \in \mathbb{Z}^n_2$ and rows $v$ of $H_X$. Now we recall that $\mathcal{S}$ must be abelian. The commutation rule $[X(u),Z(v)] = 0$ requires that 
+A state stabilized by $X(v)$ must be a coherent superposition of states $\ket{x} + \ket{v}$. Therefore, if we construct a matrix $H_X$ such that every row of the matrix stabilizes elements of a certain subspace $C_2$, this subspace is constituted by coherent superpositions of vectors $\ket{x} \in \mathbb{Z}^n_2$ and rows $v$ of $H_X$. Now we recall that $\mathcal{S}$ must be abelian. The commutation rule $[X(u),Z(v)] = 0$ requires that 
 \begin{align} \label{commutationCSS}
     H_X H_Z^T = 0
 \end{align}
@@ -591,7 +759,7 @@ which implies that any row $g_i$ in $H_X$ satisfies $H_Z g_i^T = 0$. So, if $C_1
 
 \chapter{Topological Quantum Error Correction} \label{ch:TQEC}
 
-We have introduced the algebraic framework for diagonsing and correcting quantum errors. However, the practical implementation of QECC must face another critical challenge: the strict near-neighbor connectivity of physical qubits in real scalable hardware platforms, such as superconducting circuits \cite{QuantumSupremacy2019} \cite{Het_nyi_2024}. This constraint necessitates the development of quantum error-correcting codes that can be implemented with local interactions, i.e., families of stabilizer codes where the number of qubits in the support of any of the stabilizer generators must be bounded. This will be the depart point of topological quantum codes, a concept initiated by Kitaev's toric code \cite{Kitaev2003}.\\
+We have introduced the algebraic framework for diagnosing and correcting quantum errors. However, the practical implementation of QECC must face another critical challenge: the strict near-neighbor connectivity of physical qubits in real scalable hardware platforms, such as superconducting circuits \cite{QuantumSupremacy2019} \cite{Het_nyi_2024}. This constraint necessitates the development of quantum error-correcting codes that can be implemented with local interactions, i.e., families of stabilizer codes where the number of qubits in the support of the stabilizer generators must be bounded. This will be the departure point of topological quantum codes, a concept initiated by Kitaev's toric code \cite{Kitaev2003}.\\
 
 \section{Homology}
 
@@ -634,7 +802,7 @@ Surface codes are a type of CSS codes, where the $X$ and $Z$ stabilizers have th
     \ket{c} = \bigotimes_i \ket{c_i} 
 \end{align}
 
-It is useful to define groups homeomorphism from $C_1$ to the group of Pauli operators $\mathcal{P}_n$, where $n$ is the number of edges in the lattice and hence the number of physical qubits. We can define two homomorphisms, $X: C_1 \rightarrow \mathcal{P}_n$ and $Z: C_1 \rightarrow \mathcal{P}_n$, such that 
+It is useful to define groups homomorphism from $C_1$ to the group of Pauli operators $\mathcal{P}_n$, where $n$ is the number of edges in the lattice and hence the number of physical qubits. We can define two homomorphisms, $X: C_1 \rightarrow \mathcal{P}_n$ and $Z: C_1 \rightarrow \mathcal{P}_n$, such that 
 \begin{align}
     X_c = \bigotimes_i X^{c_i}_i \quad \text{and} \quad Z_c = \bigotimes_i Z^{c_i}_i.
 \end{align}
@@ -644,7 +812,7 @@ Given these homomorphisms, we can define the face (or plaquette) and vertex (or 
 X_f:= \prod _{e \in \partial_2 f} X_e \quad \text{and} \quad Z_v := \prod _{e |v \in \partial_1 e} Z_e
 \end{align}
 
-Those operators are ilustrated in figure \ref{fig:surface_code}, giving a clear intuition of their geometric meaning. The face and vertex operators commute with each other, and hence we can consider a stabilizer group $\mathcal{S}$ generated by them. In order to see the code subspace stabilized by $\mathcal{S}$, we can apply the projectors associated with each generator to any state of the total Hilbert space $\ket{c}$, $c \in C_1$:
+Those operators are illustrated in figure \ref{fig:surface_code}, giving a clear intuition of their geometric meaning. The face and vertex operators commute with each other, and hence we can consider a stabilizer group $\mathcal{S}$ generated by them. In order to see the code subspace stabilized by $\mathcal{S}$, we can apply the projectors associated with each generator to any state of the total Hilbert space $\ket{c}$, $c \in C_1$:
 
 \begin{figure}
 \centering
@@ -670,7 +838,7 @@ Now we apply the face projectors to our surviving states $\ket{z}$:
     \prod_f \frac{1+X_f}{2} \ket{z}
 \end{align*}
 
-We can expand the product of all face terms and obtain a sum over all posible subsets of faces $ \{f_i\} $. We also use that applying face operators on adjacent faces cancels out the operators on their shared edges:
+We can expand the product of all face terms and obtain a sum over all possible subsets of faces $ \{f_i\} $. We also use that applying face operators on adjacent faces cancels out the operators on their shared edges:
 
 \begin{align*}
     \prod_f (1+X_f) = \sum_{\{f_i\}} \prod_i X_{\partial_2 f_i} = \sum_{\{f_i\}} X_{\partial_2 (\sum_i f_i)}
@@ -736,7 +904,7 @@ Intuitively, the introduction of homological degrees of freedom seems obvious, a
     \begin{align}
     \dim H_1^\partial =-|\tilde{V}| + |\tilde{E}| - |F| + \kappa_{\overline{\partial_O V}}(G) + \kappa_{\overline{\partial_C E}}(G)
     \end{align}
-    Where $\kappa_{\overline{\partial_O V}}(G)$ denote the number of connected components of $G$ containin no open vertices and $\kappa_{\overline{\partial_C E}}(G)$ denote the number of connected components of $G$ containing no closed edges.
+    Where $\kappa_{\overline{\partial_O V}}(G)$ denotes the number of connected components of $G$ containing no open vertices and $\kappa_{\overline{\partial_C E}}(G)$ denotes the number of connected components of $G$ containing no closed edges.
 \end{proposition}
 
 \begin{proof}
@@ -752,7 +920,7 @@ Intuitively, the introduction of homological degrees of freedom seems obvious, a
     \begin{align} \label{dim_ker}
         \dim Z_1^\partial = \dim Z_1 (H_2) - \dim \ker \pi =|\tilde{E}| - |\tilde{V}| + \kappa_{\overline{\partial_O V}}(G)
     \end{align}
-    Now for the relative boundaries, $B_1^\partial$ is generated by the vectors $\partial_2 f$ for all $f \in F$. If a connected component $C$ of $G$ contains at least one closed boundary edge $e \in \partial_C E$, we cannot find a combination of its faces $c_f \in C_2$, with $c_i \neq 0$ only for $f_i \in C$, such that $\partial_2 (c_f) = 0$, so the vectors $\partial_2 f$ associated with faces in this component are linearly independent. If the connected component lacks of any closed boundary edge, summing the boundary operators of all faces in the component yields the zero vector. We then conclude that:
+    Now for the relative boundaries, $B_1^\partial$ is generated by the vectors $\partial_2 f$ for all $f \in F$. If a connected component $C$ of $G$ contains at least one closed boundary edge $e \in \partial_C E$, we cannot find a combination of its faces $c_f \in C_2$, with $c_i \neq 0$ only for $f_i \in C$, such that $\partial_2 (c_f) = 0$, so the vectors $\partial_2 f$ associated with faces in this component are linearly independent. If the connected component lacks any closed boundary edge, summing the boundary operators of all faces in the component yields the zero vector. We then conclude that:
     \begin{align} \label{dim_im}
         \dim B_1^\partial = |F| - \kappa_{\partial_C E}(G)
     \end{align}
@@ -762,9 +930,9 @@ Intuitively, the introduction of homological degrees of freedom seems obvious, a
     \end{align*}
 \end{proof}
 
-There are different methods to encode a logical qubit using mixed boundaries, but we are primarily interested in continuous 2-dimensional planar patches completely devoids of internal holes or topological defects. Those are finite planar lattices forming a topological disk. 
+There are different methods to encode a logical qubit using mixed boundaries, but we are primarily interested in continuous 2-dimensional planar patches completely devoid of internal holes or topological defects. Those are finite planar lattices forming a topological disk. 
 
-Consider that we assign a uniform boundary to our planar patch (either closed or open). It is inmediate that
+Consider that we assign a uniform boundary to our planar patch (either closed or open). It is immediate that
 \begin{align*}
     \kappa_{\overline{\partial_O V}}(G) + \kappa_{\overline{\partial_C E}}(G) = 1
 \end{align*}
@@ -791,7 +959,7 @@ Hence, we conclude the necessity of using mixed boundaries to encode a logical q
     \label{fig:planarpatch}
 \end{figure}
 
-For any of the sides of the perimeter, $|V_s| - |E_S| = 1$. Therefore, $|\partial_O V| - |\partial_O E| = 2$. Applyin this and the Euler characteristic for the disk:
+For any of the sides of the perimeter, $|V_s| - |E_S| = 1$. Therefore, $|\partial_O V| - |\partial_O E| = 2$. Applying this and the Euler characteristic for the disk:
 
 \begin{align*}
     -|\tilde{V}| + |\tilde{E}| - |F| &= -|V| + |E| - |F| + |\partial_O V| - |\partial_O E|\\
@@ -800,7 +968,7 @@ For any of the sides of the perimeter, $|V_s| - |E_S| = 1$. Therefore, $|\partia
 
 We also notice that $\kappa_{\overline{\partial_O V}}(G) = \kappa_{\overline{\partial_C E}}(G) = 0$. Therefore, the dimension of the first homology group $\dim H_1 ^\partial = 1$, successfully encoding one logical qubit in our planar surface code. 
 
-If we consider this prototypical realisation of the planar surface code, we see that Z-type star stabilizers at each vertex and X-type plaquette stabilizers at each face in the interior of the lattice simultaneously stabilize four qubits. On the other hand, vertices in the smooth boundaries are only connected to 3 edges, and therefore the Z-type stabilizers along the rough boundaries are weight-3 operators. If we consider faces adjacent to rough boundaries, they are bounded by only three interior edges (therefore three physica qubits), so the X-type plaquette stabilizers along the rough boundaries are weight-3 operators too. Those weight-3 stabilizeres can be seen as algorithmic "sinks", allowing error chains to terminate on the boundaries of the lattice without pushing the system out of the code subspace. \\
+If we consider this prototypical realisation of the planar surface code, we see that Z-type star stabilizers at each vertex and X-type plaquette stabilizers at each face in the interior of the lattice simultaneously stabilize four qubits. On the other hand, vertices in the smooth boundaries are only connected to 3 edges, and therefore the Z-type stabilizers along the rough boundaries are weight-3 operators. If we consider faces adjacent to rough boundaries, they are bounded by only three interior edges (therefore three physical qubits), so the X-type plaquette stabilizers along the rough boundaries are weight-3 operators too. Those weight-3 stabilizers can be seen as algorithmic "sinks", allowing error chains to terminate on the boundaries of the lattice without pushing the system out of the code subspace. \\
 
 
 \section{Logical Operators and the Distance of the Code}
@@ -843,15 +1011,15 @@ Executing the planar surface code demands continuous syndrome extraction across 
     \label{fig:surface_code_full}
 \end{figure}
 
-Syndrome qubits are placed in the centre of each plaquette and in each vertex, and they measure the stabilizer by the application of a standarized sequence of \texttt{CNOT} gates, where the data qubits are control and the ancilla qubit is target, thus entangling the ancilla qubit with its surrounding data qubits. The circuits are shown in figures \ref{fig:x-syndrome} and \ref{fig:z-syndrome}. 
+Syndrome qubits are placed in the centre of each plaquette and in each vertex, and they measure the stabilizer by the application of a standardised sequence of \texttt{CNOT} gates, where the data qubits are control and the ancilla qubit is target, thus entangling the ancilla qubit with its surrounding data qubits. The circuits are shown in figures \ref{fig:x-syndrome} and \ref{fig:z-syndrome}. 
 
-In practice, we avoid the application of correcting physical operations once we detect errors, as they could introduce more noise in the system. Instead, we keep track the accumulation of errors by use of a classical registry known as the Pauli frame \cite{deBeaudrap2020}. The positive Pauli frame is that in which the encoded state is a +1 eigenstate of all the stabilizers.
+In practice, we avoid the application of correcting physical operations once we detect errors, as they could introduce more noise in the system. Instead, we keep track of the accumulation of errors by use of a classical registry known as the Pauli frame \cite{deBeaudrap2020}. The positive Pauli frame is that in which the encoded state is a +1 eigenstate of all the stabilizers.
 
 \chapter{Lattice Surgery} \label{ch:LS}
 
 Surface codes provide a promising method to encode logical qubits in fault-tolerant architectures. However, the standard transversal realisation of multi-qubit gates, where the physical qubits of different planar patches should interact with each other, would violate the 2-Dimensional Nearest-Neighbour (2DNN) connectivity. Lattice surgery constitutes a very useful approach, as it performs multi-qubit operations exclusively interacting the boundaries of the patches. Let's construct this approach using certain tools of category theory, as introduced in \cite{Cowtan_2024} and \cite{cowtan2025fastfaulttolerantlogicalmeasurements}. 
 
-In order to undertand the construction of lattice surgery, we need to review some basic concepts of category theory \cite{cowtan2025homologyhopfalgebrasquantum}.
+In order to understand the construction of lattice surgery, we need to review some basic concepts of category theory \cite{cowtan2025homologyhopfalgebrasquantum}.
 
 \begin{definition} \label{cone_limit}
     (i) Given a category $\mathcal{A}$ and an index category $\mathcal{I}$, a functor $D: \mathcal{I} \rightarrow \mathcal{A}$ is a diagram of shape $\mathcal{I}$ in $\mathcal{A}$. \\
@@ -867,7 +1035,7 @@ In order to undertand the construction of lattice surgery, we need to review som
     \draw[->] (DI) -- (DJ) node[midway, right] {$D(u)$};
     \end{tikzpicture}
     \end{center}
-    conmutes. \\
+    commutes. \\
     (iii) A limit of $D$ is a cone $(L, \pi_i)$ over $D$ such that, for any other cone $(N, \psi_i)$ over $D$, there exists a unique morphism $h: N \rightarrow L$ such that, for all $I \in \mathcal{I}$, $\pi_i \circ h = \psi_i$. \\
 \end{definition}
 
@@ -884,15 +1052,15 @@ In a more intuitive description, a diagram is a functor "stamping" the abstract 
 
     \draw[->] (DI) -- (DJ) node[midway, left] {$D(u)$};
     \draw[->] (DI) -- (A)  node[midway, above right] {$\phi_I$};
-    \draw[->] (DJ) -- (A)  node[midway, below right] {$\phi_J$};
+    \draw[->]  (DJ) -- (A)  node[midway, below right] {$\phi_J$};
     \end{tikzpicture}
     \end{center}
-    conmutes. \\
-    (ii) A colimit of $D$ is a cocone $(L, \pi_i)$ over $D$ such that, for any other cocone $(N, \phi_i)$ over $D$,there is a unique morphism $h: L \rightarrow A$ such that, for all $I \in \mathcal{I}$, $h \circ \pi_i= \phi_I$.
+    commutes. \\
+    (ii) A colimit of $D$ is a cocone $(L, \pi_i)$ over $D$ such that, for any other cocone $(N, \phi_i)$ over $D$,there is a unique morphism $h: L \rightarrow N$ such that, for all $I \in \mathcal{I}$, $h \circ \pi_i= \phi_I$.
 \end{definition}
 
 The mathematical substrate upon which we will operate is the category $\Mat_{\mathbb{F}_2}$. Its objects are finite-dimensional vector spaces over the field $\mathbb{F}_2$ and its morphisms are linear transformations. From this, we can define a structurally richer category: $\Ch(\Mat_{\mathbb{F}_2})$, the category of chain complexes. Its objects $C$ are sequences of vector spaces over $\mathbb{F}_2$
-connected by boundary morphisms $\partial_n$ subject tot the nilpotency condition:
+connected by boundary morphisms $\partial_n$ subject to the nilpotency condition:
 \begin{equation}
     \cdots \rightarrow C_{n+1} \xrightarrow{\partial_{n+1}} C_n \xrightarrow{\partial_n} C_{n-1} \rightarrow \cdots \quad ; \qquad \partial_n \circ \partial_{n+1} = 0
 \end{equation}
@@ -916,13 +1084,13 @@ $\Ch(\Mat_{\mathbb{F}_2})$ is an abelian category, which ensures the existence o
     \begin{center}
         $B \xleftarrow{f} A \xrightarrow{g} C$
     \end{center}
-    where $A$ could be seen as a common object and $f$ and $g$ as inclussion maps. A pushout consists of an object $P$ and two morphisms $i_1: B \rightarrow P$ and $i_2: C \rightarrow P$, such that $i_1 \circ f = i_2 \circ g$. We can construct the pushout using the coproduct and the coequalizer. We first take the coproduct of $B$ and $C$, $B \amalg C$, with the canonical inclusion morphisms $i_B: B \rightarrow B \amalg C$ and $i_C: C \rightarrow B \amalg C$. The coproduct is too big, as it contains all of $B$ and $C$, so the "shared" part A is represented twice. We need to map $A$ into the coproduct, either mapping $A$ into B and then into the coproduct, via $i_B \circ f$, or mapping $A$ into C and then into the coproduct, via $i_C \circ g$. We have the diagram that defines the coequalizer:
+    where $A$ could be seen as a common object and $f$ and $g$ as inclusion maps. A pushout consists of an object $P$ and two morphisms $i_1: B \rightarrow P$ and $i_2: C \rightarrow P$, such that $i_1 \circ f = i_2 \circ g$. We can construct the pushout using the coproduct and the coequalizer. We first take the coproduct of $B$ and $C$, $B \amalg C$, with the canonical inclusion morphisms $i_B: B \rightarrow B \amalg C$ and $i_C: C \rightarrow B \amalg C$. The coproduct is too big, as it contains all of $B$ and $C$, so the "shared" part A is represented twice. We need to map $A$ into the coproduct, either mapping $A$ into B and then into the coproduct, via $i_B \circ f$, or mapping $A$ into C and then into the coproduct, via $i_C \circ g$. We have the diagram that defines the coequalizer:
     \begin{align*}
         A \mathrel{\mathop{\rightrightarrows}^{\text{i}_B \circ f}_{\text{i}_C \circ g}} B \amalg C
     \end{align*}
     Therefore, the colimit of this diagram gives us an object $P$, with its universal morphism $\pi : B \amalg C \rightarrow P$. The object $P$ is the pushout.
 \end{itemize}
-Now consider that we have two chain complexes $A$ and $B$ in $\Ch(\Mat_{\mathbb{F}_2})$. If we want to merge those two spaces, we can define the surface along wich they will be merged. In the context of planar codes, the boundary subcomplexes, constituted as subcomplexes of the boundary spaces of the original chain complexes ($S \subset \partial A$ and $S \subset \partial B$). As the boundary operators are still defined in $S$, the homology $H(S)$ is well defined. We define chain monomorphisms, that is, inyective maps that commute with the boundary operators $f_{n-1} \circ \partial_n^S = \partial_n^{A} \circ f_n$, denoted as $f: S \rightarrow A$ and $g: S \rightarrow B$. This constitutes a span, $A \xleftarrow{f} S \xrightarrow{g} B$. The colimit of such a diagram, the pushout, can be computed for each degree, using the procedure we gave above, and considering that $\Ch(\Mat_{\mathbb{F}_2})$ is an abelian category and therefore the coproduct can be expressed as a direct sum:
+Now consider that we have two chain complexes $A$ and $B$ in $\Ch(\Mat_{\mathbb{F}_2})$. If we want to merge those two spaces, we can define the surface along wich they will be merged. In the context of planar codes, the boundary subcomplexes, constituted as subcomplexes of the boundary spaces of the original chain complexes ($S \subset \partial A$ and $S \subset \partial B$). As the boundary operators are still defined in $S$, the homology $H(S)$ is well defined. We define chain monomorphisms, that is, injective maps that commute with the boundary operators $f_{n-1} \circ \partial_n^S = \partial_n^{A} \circ f_n$, denoted as $f: S \rightarrow A$ and $g: S \rightarrow B$. This constitutes a span, $A \xleftarrow{f} S \xrightarrow{g} B$. The colimit of such a diagram, the pushout, can be computed for each degree, using the procedure we gave above, and considering that $\Ch(\Mat_{\mathbb{F}_2})$ is an abelian category and therefore the coproduct can be expressed as a direct sum:
 \begin{equation}
     M_n = \frac{A_n \oplus B_n}{\{f_n(s) \backsim g_n(s) \ | \ s \in S_n\}}
 \end{equation}
@@ -936,7 +1104,7 @@ and, by the Snake Lemma \cite{cowtan2025fastfaulttolerantlogicalmeasurements}, w
 \end{equation}
 Where $i_*$ is induced by $(f,g)$ and $\pi_*$ by $\pi$, while $\delta$ is the connector homomorphism given by the Snake Lemma.  As it is an exact sequence, $\text{im}(i_*) = \ker (\pi_*)$. Therefore, any non-trivial cycle in $S$ collapses to the trivial homological class in the merged complex $M$. This means that a logical operator along the merged boundary $S$ becomes a trivial cycle and hence a stabilizer. $\text{im}(\pi_*) = \ker(\delta)$ means that the valid cycles in the merged space inherited from the original patches must have no boundaries contained in $S$. Intuitively, this is seen as the condition that logical operators originally ending at the merging face must concatenated to form a valid logical operator in the resulting surface.
 
-In an standard merge operation, $S$ is chosen in such a way that it codifies on logical operator, so $\dim H_1(S) = 1$. We also assume that its injection towards the original patches is non-trivial, so $\dim (\text{im} i_*) = 1$. As $\text{im}(i_*) = \ker (\pi_*)$, we know that, out of the $k_A + k_B$ original degrees of freedom present in the coproduct, a 1-dimensional subspace collapses towards the trivial class when projected by $q_*$ towards $M$, so the dimension of the resulting code is $k_A + k_B - 1$. If the original patches encoded one logical qubit, the merged patch will also encode one logical qubit.
+In an standard merge operation, $S$ is chosen in such a way that it codifies one logical operator, so $\dim H_1(S) = 1$. We also assume that its injection towards the original patches is non-trivial, so $\dim (\text{im} i_*) = 1$. As $\text{im}(i_*) = \ker (\pi_*)$, we know that, out of the $k_A + k_B$ original degrees of freedom present in the coproduct, a 1-dimensional subspace collapses towards the trivial class when projected by $q_*$ towards $M$, so the dimension of the resulting code is $k_A + k_B - 1$. If the original patches encoded one logical qubit, the merged patch will also encode one logical qubit.
 
 For the split operation, we must introduce a cut along the original patch $M$. The line along which we cut the manifold defines a chain subcomplex $S$. We can define two descending chain complexes, $A$ and $B$, and construct a \textit{cospan} diagram with two chain epimorphisms, $p: A \rightarrow S$ and $q: B \rightarrow S$ which constitute the following diagram:
 \begin{equation}
@@ -946,15 +1114,15 @@ The merged patch prior to the split is nothing but the limit of this diagram, al
 \begin{equation} 
     M_n = \{ (a,b) \in A_n \oplus B_n \mid p_n(a) = q_n(b) \} \
 \end{equation}
-The restriction forces that, prior to the split operation, any operator in region $A$ that touches $S$ must be perfectly continued by an operator in $B$. This split operation is defined as the application of the canonical morfisms of the limit $\pi_A: M \rightarrow A$ and $\pi_B: M \rightarrow B$. The system abandons $M$ and is injected into the space $A \oplus B$. The cinematic of the logical information during the split operation is governed by the short exact sequence:
+The restriction forces that, prior to the split operation, any operator in region $A$ that touches $S$ must be perfectly continued by an operator in $B$. This split operation is defined as the application of the canonical morphisms of the limit $\pi_A: M \rightarrow A$ and $\pi_B: M \rightarrow B$. The system abandons $M$ and is injected into the space $A \oplus B$. The kinematics of the logical information during the split operation is governed by the short exact sequence:
 \begin{equation}
     0 \to M \xrightarrow{i} A \oplus B \xrightarrow{p-q} S \to 0
 \end{equation}
-where $i$ is the inclusion morphism defined by $\pi_A$ and $\pi_B$. Once again, applying the Snake Lemmma yields us a long exact sequence:
+where $i$ is the inclusion morphism defined by $\pi_A$ and $\pi_B$. Once again, applying the Snake Lemma yields us a long exact sequence:
 \begin{equation}
     \dots \to H_1(M) \xrightarrow{i_*} H_1^\partial(A) \oplus H_1^\partial(B) \xrightarrow{p_*-q_*} H_1^\partial(S) \xrightarrow{\delta} H_0(M) \to \dots
 \end{equation}
-The induced map $i_*$ takes a logical cycle $[m] \in H_1(M)$ and maps it to the biproduct, yielding $([m_A], [m_B])$, representing the distribution of the original operator in the new two patches. As $\text{im}(i_*) = \ker (p_* - q_*)$, $p_*([m_a]) = q_*([m_b])$, which ensures that the restriction of the operators on the split surface $S$ must be the same. If the split cuts through the original operator $[m]$, the restriction on $S$ is not null, so the system prohibits the isolated existence of operator $[m_A]$ in the new space. This means that we cannot perform the measurement $[m_A] \otimes \mathbb{I}_B$, as it would not commute with the stabilizers in the new structure. The categorical descrpition of the split operation produces a notion of quantum entanglement. 
+The induced map $i_*$ takes a logical cycle $[m] \in H_1(M)$ and maps it to the biproduct, yielding $([m_A], [m_B])$, representing the distribution of the original operator in the new two patches. As $\text{im}(i_*) = \ker (p_* - q_*)$, $p_*([m_a]) = q_*([m_b])$, which ensures that the restriction of the operators on the split surface $S$ must be the same. If the split cuts through the original operator $[m]$, the restriction on $S$ is not null, so the system prohibits the isolated existence of operator $[m_A]$ in the new space. This means that we cannot perform the measurement $[m_A] \otimes \mathbb{I}_B$, as it would not commute with the stabilizers in the new structure. The categorical description of the split operation produces a notion of quantum entanglement. 
 
 By discussing the split and merge operations from the perspective of category theory, we have provided a solid mathematical background for said procedures, perfectly matching with the topological description of planar codes. However, discussing how those operations are performed by measuring observables on the boundaries of planar patches we will obtain a clearer intuition of the process, as well as a better understanding of the dynamics of the logical information encoded in the planar patches. We will also distinguish between smooth and rouh operations, depending on which boundary we are using to perform the surgery. \\
 
@@ -965,20 +1133,20 @@ Consider two planar patches $A$ and $B$ encoding one logical qubit each, stabili
 \begin{figure} [ht]
     \centering
     \input{tikz/rough_merging.tex}
-    \caption{Physical distribution of qubits for a rough lattice merging operation. Black dots represent physical qubits subject to the stabilizers of their corresponding patch, and pink qubits are unitialized physical qubits.}
+    \caption{Physical distribution of qubits for a rough lattice merging operation. Black dots represent physical qubits subject to the stabilizers of their corresponding patch, and pink qubits are uninitialized physical qubits.}
     \label{fig:rough_merging}
 \end{figure}
 
-We determine the sign of the new X-stabilizeres along the merged boundary, and therefore the eigenvalue of their product, which is equivalent to measuring the $X_{L,A} \otimes X_{L,B}$ operator. This measurement forces the collapse of the global state towards an eigenvalue of the operator, thus collapsing one degree of freedom, as the non-trivial chain representing $X_{L,A} \otimes X_{L,B}$ becomes now a trivial chain and hence a stabilizer. As the joint operator acts as the logical identity on the unified code subspace, the operators $X_{L,A}$ and $X_{L,B}$ are now equivalent, as they can be deformed from one patch to another by the new stabilizers. On the other hand, $Z_{L,A}$ and $Z_{L,B}$ which originally ended at the merged surface now have interior boundaries, and hence they stop being valid logical operators. A new logical operator $Z_L$ is defined, conformed by the concatenation of both $Z_{L,A}$ and $Z_{L,B}$. This analysis perfectly matches the prior discussion about the merging as a pushout in $\Ch(\Mat_{\mathbb{F}_2})$, where we concluded the collapse of a degree of freedom as well as of a valid logical operator in $S$, and also predicted the concatenation of logical operators with endpoints on $S$. 
+We determine the sign of the new X-stabilizers along the merged boundary, and therefore the eigenvalue of their product, which is equivalent to measuring the $X_{L,A} \otimes X_{L,B}$ operator. This measurement forces the collapse of the global state towards an eigenvalue of the operator, thus collapsing one degree of freedom, as the non-trivial chain representing $X_{L,A} \otimes X_{L,B}$ becomes now a trivial chain and hence a stabilizer. As the joint operator acts as the logical identity on the unified code subspace, the operators $X_{L,A}$ and $X_{L,B}$ are now equivalent, as they can be deformed from one patch to another by the new stabilizers. On the other hand, $Z_{L,A}$ and $Z_{L,B}$ which originally ended at the merged surface now have interior boundaries, and hence they stop being valid logical operators. A new logical operator $Z_L$ is defined, constituted by the concatenation of both $Z_{L,A}$ and $Z_{L,B}$. This analysis perfectly matches the prior discussion about the merging as a pushout in $\Ch(\Mat_{\mathbb{F}_2})$, where we concluded the collapse of a degree of freedom as well as of a valid logical operator in $S$, and also predicted the concatenation of logical operators with endpoints on $S$. 
 
 If we recover the construction of the dual lattice, a smooth merge can be defined, initializing the intermediate qubits in the states $\ket{+}$ and measuring the new joint operators, equivalent to measuring $Z_{L,A} \otimes Z_{L,B}$. The following discussion can be perfectly developed for a smooth merge, but it will be omitted to avoid redundancy.
 
-The projective measurements performed during the merging operation necessarilly produce the non-unitary evolution of the system, which is clearly manifested by the reduction of the dimensionality of the logical space \cite{deBeaudrap2020}. The measurement of the operator $X_{L,A} \otimes X_{L,B}$ projects the global state towards one of its eigenspaces, revealing a global eigenvalue $M = \pm 1$. If $M = +1$ (the positive branch), the parity forces that in the merged patch $X_{L,A} \equiv X_{L,B}$. If $M = -1$ (the negative branch), the parity forces that in the merged patch $X_{L,A} \equiv -X_{L,B}$, as if one of the original patches suffered a chain of $Z$ errors. The non-unitary evolution can be described by a CPTP map. In Kraus representation:
+The projective measurements performed during the merging operation necessarily produce the non-unitary evolution of the system, which is clearly manifested by the reduction of the dimensionality of the logical space \cite{deBeaudrap2020}. The measurement of the operator $X_{L,A} \otimes X_{L,B}$ projects the global state towards one of its eigenspaces, revealing a global eigenvalue $M = \pm 1$. If $M = +1$ (the positive branch), the parity forces that in the merged patch $X_{L,A} \equiv X_{L,B}$. If $M = -1$ (the negative branch), the parity forces that in the merged patch $X_{L,A} \equiv -X_{L,B}$, as if one of the original patches suffered a chain of $Z$ errors. The non-unitary evolution can be described by a CPTP map. In Kraus representation:
 \begin{equation}
     M_R(\rho) = K_{0,R} \rho K_{0,R}^\dagger + K_{1,R} \rho K_{1,R}^\dagger 
 \end{equation}
 
-Where each Kraus operator $K_{b,R}$ represents the evolution in the case of $M= (-1)^b$. When $M=1$, there is no discrepancy and $K_{0,R}$ projects the correlation in the Hadamard base $K_{0,R} = \ket{+}_M \bra{++} + \ket{-}_M \bra{--}$. For the negative branch, instead of applying a correcting $Z$ chain, the assymetry is absorbed in the Pauli frame by considering a $Z$ error in either of the original patches. The election of which patch will be treated as if it suffered an error will determine the Kraus operator for the negative branch. For instance, if we correct the right patch, $K_{1,R} = \ket{+}_M \bra{+-} + \ket{-}_M \bra{-+}$, forcing the second logical qubit to align with the sign of the first. Let's try to produce a truth table using the Kraus operators to track the evolution of the initial logical state. The possible states are:
+Where each Kraus operator $K_{b,R}$ represents the evolution in the case of $M= (-1)^b$. When $M=1$, there is no discrepancy and $K_{0,R}$ projects the correlation in the Hadamard base $K_{0,R} = \ket{+}_M \bra{++} + \ket{-}_M \bra{--}$. For the negative branch, instead of applying a correcting $Z$ chain, the asymmetry is absorbed in the Pauli frame by considering a $Z$ error in either of the original patches. The selection of which patch will be treated as if it suffered an error will determine the Kraus operator for the negative branch. For instance, if we correct the right patch, $K_{1,R} = \ket{+}_M \bra{+-} + \ket{-}_M \bra{-+}$, forcing the second logical qubit to align with the sign of the first. Let's try to produce a truth table using the Kraus operators to track the evolution of the initial logical state. The possible states are:
 
 \begin{align*}
 \ket{00}_L &= \frac{1}{2}\left( \ket{++}_L + \ket{+-}_L + \ket{-+}_L + \ket{--}_L \right) \\
@@ -1026,21 +1194,21 @@ Lattice splitting can be viewed as the opposite operation of lattice merging. By
 
 We perform Z measurements on the crossed qubits in \ref{fig:rough_splitting}, which conform an interrupted line connecting two smooth boundaries through a path of interior edges. This line of measurements annihilate the degrees of freedom of said qubits, effectively splitting the original surface $M$ in two separate patches $A$ and $B$. The Z-type stabilizers corresponding to the plaquettes adjacents to the measured qubits are truncated into boundary stabilizers of weight 3. 
 
-The logical operators $X_{L,A}$ and $X_{L,B}$ in the resulting patches conmmute with the measurements of the split operation, so $X_{L,A} \equiv X_{L,B} \equiv X_{L,M}$, thus dividing the original logical qubit in two entangled logical qubits. To understand why this does not violate the no-cloning theorem, we notice that the $Z_{L,M}$ operator also commutes with the measurements of the split operation, and hence $Z_{L,M} \equiv Z_{L,A} \otimes Z_{L,B}$, which implies a distribution of the $Z_L$ operator, fixing the parity in the commputational basis. 
+The logical operators $X_{L,A}$ and $X_{L,B}$ in the resulting patches commute with the measurements of the split operation, so $X_{L,A} \equiv X_{L,B} \equiv X_{L,M}$, thus dividing the original logical qubit in two entangled logical qubits. To understand why this does not violate the no-cloning theorem, we notice that the $Z_{L,M}$ operator also commutes with the measurements of the split operation, and hence $Z_{L,M} \equiv Z_{L,A} \otimes Z_{L,B}$, which implies a distribution of the $Z_L$ operator, fixing the parity in the computational basis. 
 
 The probabilistic character of the $Z$ measurements implies once again the $\pm1$ results. If all measurement outcomes are +1, then the separation is perfect and does not require any correction. However, if one measurement yields an eigenvalue $-1$, the two truncated Z-type plaquette stabilizers adjacents to said measurement collapse towards their negative subspace. We update the Pauli frame and simulate a chain of X operators to correct the error. The rough split is naturally described by the Kraus operator $U_R = \ket{++} \bra{+} + \ket{--} \bra{-}$.
 
 \chapter{ZX calculus} \label{ch:ZXC}
 
-The ZX calculus is a graphical tool for the diagramatic representation and manipulation of quantum computation, presenting an alternative to the standard quantum circuit model, firstly presented in \cite{Coecke_2011}. We will give a brief introduction, as it will be a fundamental tool for the present work, but a complete review of the notation can be consulted in \cite{KissingerWetering2024Book}.
+The ZX calculus is a graphical tool for the diagrammatic representation and manipulation of quantum computation, presenting an alternative to the standard quantum circuit model, firstly presented in \cite{Coecke_2011}. We will give a brief introduction, as it will be a fundamental tool for the present work, but a complete review of ZX calculus can be consulted in \cite{KissingerWetering2024Book}. A formal treatment as a monoidal category theory is presented in appendix \ref{ch:AFZX}.
 
 \section{ZX diagrams}
 
 While standard circuit notation implements a rigid temporal sequence of unitary operations, ZX calculus abstracts quantum computations into flexible tensor networks, known as ZX diagrams. Structurally, those diagrams are composed by edges and specific nodes called spiders. The edges represent a two-dimensional index (a qubit) attached to the specific tensors represented by the spiders. Those tensors could represent operations, as well as projections and preparations.
 
-The diagrams hav two families of generators, defined with respect to the computational basis (Z-basis) and the Hadamard-transformed diagonal basis (X-basis). In this work, red nodes will represent the computational basis and green nodes the diagonal basis. When the edges are attached to a node, depending on which side they come from they will represent either input legs or output legs. We will use the standard convention where edges coming in the left side of the node correspond to input legs (or time flows from left to right). Nodes may have an associated angle, representing a relative phase. The translation between spiders and bra-ket notation can be summarized in the following equalities:
+The diagrams have two families of generators, defined with respect to the computational basis (Z-basis) and the Hadamard-transformed diagonal basis (X-basis). In this work, red nodes will represent the computational basis and green nodes the diagonal basis. When the edges are attached to a node, depending on which side they come from they will represent either input legs or output legs. We will use the standard convention where edges coming on the left side of the node correspond to input legs (or time flows from left to right). Nodes may have an associated angle, representing a relative phase. The translation between spiders and bra-ket notation can be summarized in the following equalities:
 
-\begin{equation}
+\begin{equation} \label{ZX_spiders}
 \zx{ \leftManyDots{n} \zxZ{\alpha} \rightManyDots{m}} = \ket{\underbrace{0 \cdots 0}_{m}} \bra{\underbrace{0 \cdots 0}_{n}} + e^{i \alpha} \ket{{\underbrace{1 \cdots 1}_{m}}} \bra{\underbrace{1 \cdots 1}_{n}} 
 \end{equation}
 \begin{equation*}
@@ -1052,7 +1220,7 @@ Therefore, each diagram can be associated with a linear map. Preparations and pr
     \zx{ \zxX{\alpha} \rar & \zxN{}} = R_x (\alpha) \ket{0} \quad \zx{ \zxN{} \rar & \zxX{\alpha}} = \bra{0} R_x  (\alpha)
 \end{equation}
 
-The composition of those basic generators allow for the systematic construction of ZX diagrams. If a edge has an endpoint without a node, it is considered either an input or an output (depending on the convention we use for input and output legs). For example, a way to construct a \texttt{CNOT} gate with ZX calculus:
+The composition of those basic generators allow for the systematic construction of ZX diagrams. If an edge has an endpoint without a node, it is considered either an input or an output (depending on the convention we use for input and output legs). For example, a way to construct a \texttt{CNOT} gate with ZX calculus:
 \begin{align*}
 \begin{ZX}[mbr=1.5]
   \zxN{} \rar & \zxZ{} \dar \rar & \zxN{} \\
@@ -1064,6 +1232,12 @@ The composition of those basic generators allow for the systematic construction 
 \end{align*}
 
 Hadamard gates in this work will be represented as blue lines connecting two nodes, as they are quite frequent and this allows us to avoid the saturation of the diagrams.
+
+The deformation of a ZX diagram that do not alter its topology produces an isomorphic ZX diagram that describes the same linear map, given that the inputs and outputs are fixed \cite{Sutcliffe_2025}. This is commonly known as the meta-rule: only connectivity matters. Another fundamental property of ZX diagrams is what we call \textbf{universality}:
+
+\begin{theorem}\label{universality}
+    Any linear map $L:\mathcal{c}^{2^n} \rightarrow \mathbb{C}^{2^m}$ can be represented as a ZX diagram \cite{KissingerWetering2024Book}.
+\end{theorem}
 
 \section{Rewrite Rules}
 
@@ -1222,7 +1396,7 @@ As the $X$ and $Z$ basis are related by the Hadamard gate, the commutation of a 
 \end{tikzpicture}
 \end{equation}
 
-When a "copy" structures of a certainc colour interacts with a structure of parity evaluation of another colour, the graph can be rewritten using the \textbf{strong complementary} rule:
+When a "copy" structure of a certain colour interacts with a structure of parity evaluation of another colour, the graph can be rewritten using the \textbf{strong complementary} rule:
 
 \begin{equation} \label{rule:strong_complementary}
     \begin{tikzpicture}[baseline=(current bounding box.center), thick]
@@ -1280,7 +1454,7 @@ Although those rules may be enough for the reduction of Clifford ZX diagrams, we
 
 \section{ZX calculus and lattice surgery}
 
-The non-unitary evolution of quantum systems under the operations of lattice surgery makes the standard circuit model unable to faithfully represent the dynamics of the procedures. On the other hand, ZX calculus has proven to be a natural way to represent lattice surgery, as described by de Beaudrap (2020). We want to present this correspondence, founded in the mapping from the Kraus operators of lattice surgery to the spiders of ZX diagrams.
+The non-unitary evolution of quantum systems under the operations of lattice surgery makes the standard circuit model unable to faithfully represent the dynamics of the procedures. On the other hand, ZX calculus has proven to be a natural way to represent lattice surgery, as described by \cite{deBeaudrap2020}. We want to present this correspondence, founded in the mapping from the Kraus operators of lattice surgery to the spiders of ZX diagrams.
 
 It is easy to see that the linear maps corresponding to 2-to-1 nodes in ZX diagrams perfectly match the Kraus operators for the positive branch of a lattice merge.
 
@@ -1297,7 +1471,7 @@ It is easy to see that the linear maps corresponding to 2-to-1 nodes in ZX diagr
 \ = \ K_{0,R}
 \end{equation}
 
-The correspondence between lattice split and 1-to-2 nodes is also inmediate:
+The correspondence between lattice split and 1-to-2 nodes is also immediate:
 
 \begin{equation}
 \begin{ZX}
@@ -1311,7 +1485,7 @@ The correspondence between lattice split and 1-to-2 nodes is also inmediate:
 \ = \ U_R
 \end{equation}
 
-This inmediately yields the result that the positive branches of lattice surgery procedures are naturally captured by ZX diagrams with nodes od degree 2 and 3. Nodes of greater degree, or including angles, can be described, using the spider fusion rule, as the composition of rotations and split and merge operations in the positive branch. If we consider the realisation of the \texttt{CNOT} by composing a rough merge and a smooth split, the positive branch is given by $(I \otimes K_{0,R})(U_S \otimes I) = \frac{1}{\sqrt{2}}\texttt{CNOT}$. Therefore, the subnormalisation we found when implementing the \texttt{CNOT} gate in ZX diagrams correspond to the fact that it only captures the positive branch of the procedure, which in this case has a probability of $1/2$. 
+This immediately yields the result that the positive branches of lattice surgery procedures are naturally captured by ZX diagrams with nodes of degree 2 and 3. Nodes of greater degree, or including angles, can be described, using the spider fusion rule, as the composition of rotations and split and merge operations in the positive branch. If we consider the realisation of the \texttt{CNOT} by composing a rough merge and a smooth split, the positive branch is given by $(I \otimes K_{0,R})(U_S \otimes I) = \frac{1}{\sqrt{2}}\texttt{CNOT}$. Therefore, the subnormalisation we found when implementing the \texttt{CNOT} gate in ZX diagrams correspond to the fact that it only captures the positive branch of the procedure, which in this case has a probability of $1/2$. 
 
 For the negative branch of the lattice merge, we have to consider the adaptation of the Pauli frame, which is easily captured by ZX diagrams. It requires adding a $\pi$ rotation prior to the 2-to-1 node. If we consider that the correction is applied on the second patch, we obtain:
 
@@ -1328,9 +1502,9 @@ For the negative branch of the lattice merge, we have to consider the adaptation
 \ = \ K_{1,R}
 \end{equation}
 
-For this work, we will restrict the study to the positive branch. This is physically justified as the dynamic of the negative branch does not alter the structure of the information processes, and it differs from the positive branch only by the action of additional Pauli operators. As the aparition of those Pauli operators is univocally heralded by the classical bit resulting from the merging measurement, they can be absorbed by the classical control system, avoiding the necessity of corrections in the quantum hardware. Therefore, when compiling the algorithm the hardware executes the same sequence of splits and merges, independently of the eigenvalues obtained.
+For this work, we will restrict the study to the positive branch. This is physically justified as the dynamic of the negative branch does not alter the structure of the information processes, and it differs from the positive branch only by the action of additional Pauli operators. As the emergence of those Pauli operators is univocally heralded by the classical bit resulting from the merging measurement, they can be absorbed by the classical control system, avoiding the necessity of corrections in the quantum hardware. Therefore, when compiling the algorithm the hardware executes the same sequence of splits and merges, independently of the eigenvalues obtained.
 
-It has been proven that the ZX calculus trascends its function as a a mere graphical notation system, establishing itself as a native languae of fault-tolerant quantum computation. Its set of diagrammatic rewrite rules can be implemented for an automated optimization of quantum protocols.
+It has been proven that the ZX calculus transcends its function as a a mere graphical notation system, establishing itself as a native language of fault-tolerant quantum computation. Its set of diagrammatic rewrite rules can be implemented for an automated optimization of quantum protocols.
 
 To prove the utility of ZX calculus, let's use it to present a simple implementation of a $T$ gate with lattice surgery. As we already discussed in chapter \ref{ch:QEC}, magic states permit the realisation of non-Clifford operations on surface codes. A $T$ gate specifically requires a magic state and teleportation to execute a $\pi/4$ rotation on a logical qubits. In \cite{deBeaudrap2020}, they propose an efficient execution of the $T$ gate with lattice surgery operations. Restricting ourselves to the positive branch, we have:
 
@@ -1357,11 +1531,11 @@ The resource cost of a given computation is naturally captured by its space-time
 \begin{align} \label{optimization}
     \min V(D'_{ZX}) \quad \text{such that} \quad [[D'_{ZX}]] = [[D_{ZX}]]
 \end{align}
-where $[[\cdot]]$ represents the lineal map described by the object. Applying rewrite rules allows to drastically optimize the metric. A quantitative evaluation of the space-time volume can be performed on ZX diagrams corresponding to lattice surgery procedures. The number of logical qubits required to implement a sequence of lattice surery operations represented by a ZX diagram is given by the maximum number of wires in any vertical cut of the diagram \cite{vandaele2024qubitcountoptimizationusingzxcalculus}.
+where $[[\cdot]]$ represents the lineal map described by the object. Applying rewrite rules allows to drastically optimize the metric. A quantitative evaluation of the space-time volume can be performed on ZX diagrams corresponding to lattice surgery procedures. The number of logical qubits required to implement a sequence of lattice surgery operations represented by a ZX diagram is given by the maximum number of wires in any vertical cut of the diagram \cite{vandaele2024qubitcountoptimizationusingzxcalculus}.
 
-For the temporal cost of simple protocols, we can use the layer slicing procedure \cite{zhou2026topolslatticesurgerycompilation}. We identify the entry nodes of the diagram (usually, the open wires in the left) and they are assigned the layer index $L = 1$. Their topological neighbours are assigned $L=2$. We propagate this process, and each vertex is assignated a layer index $L(v) = \max _{u \in \text{fathers}(v)} L(u) + 1$.  The temporal cost of an algorithm can be approximated by the maximum index in the diagram, which we will call the topological depth. 
+For the temporal cost of simple protocols, we can use the layer slicing procedure \cite{zhou2026topolslatticesurgerycompilation}. We identify the entry nodes of the diagram (usually, the open wires in the left) and they are assigned the layer index $L = 1$. Their topological neighbours are assigned $L=2$. We propagate this process, and each vertex is assigned a layer index $L(v) = \max _{u \in \text{fathers}(v)} L(u) + 1$.  The temporal cost of an algorithm can be approximated by the maximum index in the diagram, which we will call the topological depth. 
 
-For simple diagrams, the computation of this metric is quite straightforward, but when the protocol requires a high number of quantum gates, the complexity of the diagrams hinders the computation of its topological depth. Multi-qubit gates such as the \texttt{CNOT} or \texttt{CZ} appear as vertical lines in the ZX diagrams, amd the resolution of this ambiguity in one specific operational instantiation of the gate result in different graphs, hence altering the layer slicing procedure. Different physical realisations for the multi-qubit gates imply different topological depths. The task of reducing the rounds of error correction rounds, and hence of improving the execution time of the algorithm can be seen as an optimization problem in graph theory \cite{v1983data}. We can try to formalize it by giving a more precise definition of topological depth.
+For simple diagrams, the computation of this metric is quite straightforward, but when the protocol requires a high number of quantum gates, the complexity of the diagrams hinders the computation of its topological depth. Multi-qubit gates such as the \texttt{CNOT} or \texttt{CZ} appear as vertical lines in the ZX diagrams, and the resolution of this ambiguity in one specific operational instantiation of the gate result in different graphs, hence altering the layer slicing procedure. Different physical realisations for the multi-qubit gates imply different topological depths. The task of reducing the rounds of error correction rounds, and hence of improving the execution time of the algorithm can be seen as an optimization problem in graph theory \cite{v1983data}. We can try to formalize it by giving a more precise definition of topological depth.
 
 \begin{definition}
     Let $G = (V,E)$ be a directed acyclic graph. We define a set of entry vertices as:
@@ -1392,7 +1566,7 @@ Furthermore, the physical impositions of the hardware allow us to restrict the g
 
 Given this model for our diagrams, the time-optimization problem in a graph $G$ is solved by searching the orientation $\mathcal{O}$ that yields the minimum topological depth $D(G^\mathcal{O})$. It is clear that $D(G^\mathcal{O}) \geq D(G)$, as the length of the directed paths cannot decrease after we apply an orientation. 
 
-In order to construct an algorithmic solution for the problem, let's consider how an specific iteration could be performed: we start reading the graph from the input vertices (in figure \ref{fig:graph_model}, from the left to the right) until we find the first vertex attached to a vertical edge $e$. The two vertices connected by this edge, $v$ and $u$ have a primitive layer index $L_{in}(u)$ and $L_{in}(v)$ respectively, determined by their preceeding horizontal edges (and, for later iterations, by their preceeding directed vertical edges too). If we direct $e$ from $u \rightarrow v$, the new depth of $v$ will be $L_{out}(v) = \max \{L_{in}(v), L_{in}(u) + 1\}$, and $L_{out}(u) = L_{in}(u)$. It is inmediate that, if $L_in{v} > L_{in}(u)$, then $L_out{v} = L_{in}(u)$. Therefore, directing the edge towards the vertex with the highest depth does not produce any change on the depth of the vertices, and hence, on the total topological depth of the graph.
+In order to construct an algorithmic solution for the problem, let's consider how a specific iteration could be performed: we start reading the graph from the input vertices (in figure \ref{fig:graph_model}, from left to right) until we find the first vertex attached to a vertical edge $e$. The two vertices connected by this edge, $v$ and $u$ have a primitive layer index $L_{in}(u)$ and $L_{in}(v)$ respectively, determined by their preceding horizontal edges (and, for later iterations, by their preceding directed vertical edges too). If we direct $e$ from $u \rightarrow v$, the new depth of $v$ will be $L_{out}(v) = \max \{L_{in}(v), L_{in}(u) + 1\}$, and $L_{out}(u) = L_{in}(u)$. It is immediate that, if $L_{in}(v) > L_{in}(u)$, then $L_{out}{v} = L_{in}(u)$. Therefore, directing the edge towards the vertex with the highest depth does not produce any change on the depth of the vertices, and hence, on the total topological depth of the graph.
 
 If we have a vertical edge connecting two vertices $(u,v)$ with $L_{in}(v) = L_{in}(u)$, or strictly vertical edges, we need to define a new metric $S: V \rightarrow \mathbb{N}$, which we will call the shallowness of the vertex, and it will be given by the length of the horizontal path connecting the vertex in the argument and the output vertex of the wire. For an edge $(u,v)$ with $L_{in}(v) = L_{in}(u) = k$ and, without loss of generality, $S(u) < S(v)$, let's consider the local impact of the orientation on the cost of their respective paths $L_{out}(v) + S(v)$ and $L_{out}(u) + S(u)$:
 \begin{itemize}
@@ -1411,7 +1585,7 @@ Hence, the orientation of the vertical edges should be towards the shallowest ve
 
 In cases where there are subsequent vertical edges connecting vertices $u_i$ and $v_j$ such that $L_{in}(v_j) - L_{in}(u_i) = 1$, (in figure \ref{fig:graph_algorithm}, $(u_3, v_4)$) either orientation for the vertical edges will increase the depth of $v_j$, while if the vertical edges are directed towards the wire that contains $v_j$, then $L_{in}(u_i) = L_{out}(u_i)$. Therefore, in those situations the vertical edges should be directed towards the wire containing $v_j$. 
 
-If this case does not hold, a decision must be made, as one of the wires will necessarily suffer an increase in its depth. As we try to minimize the global depth of the graph, we make this decision by looking at the total length of all the wires. Firstly, we find the longest wire in the diagram, and direct all the strictly vertical edges attached to it towards its neighbours. This way we ensure that the total depth of the diagram does not increase. The remaining strictly vertical vertices will be oriented in an alternate way: if a wire already has strictly vertical edges oriented towards it (as in the case of the neighbours of the longest wire), the remaining strictly vertical edges attached to it will be also oriented towards it. The same thing applies for wires with directed vertical edges towards its neighbours. The criteria can be visualized in figure \ref{fig:orientation_assignation}. If there are two wires with maximum length separated by an odd number of wires, this method does not present any conflict. If they are separated by an even number of wires, any of those intermediate wires would increase its total depth by 2, so the total depth of the diagram could increase by 1. Considering the case discussed above, that could also increase the lenght of the longest wire by 1, this method provides an orientation $\mathcal{O}$ such that the topological depth of the graph $D(G^\mathcal{O}) \leq D(G) + 2$.\\
+If this case does not hold, a decision must be made, as one of the wires will necessarily suffer an increase in its depth. As we try to minimize the global depth of the graph, we make this decision by looking at the total length of all the wires. Firstly, we find the longest wire in the diagram, and direct all the strictly vertical edges attached to it towards its neighbours. This way we ensure that the total depth of the diagram does not increase. The remaining strictly vertical vertices will be oriented in an alternate way: if a wire already has strictly vertical edges oriented towards it (as in the case of the neighbours of the longest wire), the remaining strictly vertical edges attached to it will be also oriented towards it. The same thing applies for wires with directed vertical edges towards its neighbours. The criteria can be visualized in figure \ref{fig:orientation_assignation}. If there are two wires with maximum length separated by an odd number of wires, this method does not present any conflict. If they are separated by an even number of wires, any of those intermediate wires would increase its total depth by 2, so the total depth of the diagram could increase by 1. Considering the case discussed above, that could also increase the length of the longest wire by 1, this method provides an orientation $\mathcal{O}$ such that the topological depth of the graph $D(G^\mathcal{O}) \leq D(G) + 2$.\\
 
 \begin{figure} [ht]
     \centering
@@ -1428,7 +1602,7 @@ The algorithm would be as follows:
     \item We identify the wires with the greatest length, and apply the assignation represented in \ref{fig:orientation_assignation}
 \end{itemize}
 
-For the computational implementation of the problem, we will use PyZX framework, an open source python-based library specifically designed for diagramatic reasoning in ZX calculus \cite{Kissinger_2020}. At the software architecture level, PyZX abstract the problem usin two main data-structures: circuits and graphs. 
+For the computational implementation of the problem, we will use PyZX framework, an open source python-based library specifically designed for diagrammatic reasoning in ZX calculus \cite{Kissinger_2020}. At the software architecture level, PyZX abstract the problem usin two main data-structures: circuits and graphs. 
 
 The circuit class captures the standard representation of quantum protocols as a sequential application of quantum gates. On the other hand, the graph class instantiates the equivalent ZX diagram, which provides a more interesting object for our purpose. 
 
@@ -1466,14 +1640,14 @@ so the initial state is:
     \ket{\psi _0} = \ket{\psi} \otimes \ket{\Psi ^+} = \frac{1}{\sqrt{2}} [\alpha (\ket{000}] + \ket{001}) + \beta (\ket{100} + \ket{111})]
 \end{align*}
 
-Alice performs a local interaction with the first two qubits. Firstly, she applies a \texttt{CNOT}, using the unknown qubit as control, and then she applies a Hadamard gate on it. The transmitter's qubits are mapped to a Bell state. The lobal state is given now by:
+Alice performs a local interaction with the first two qubits. Firstly, she applies a \texttt{CNOT}, using the unknown qubit as control, and then she applies a Hadamard gate on it. The transmitter's qubits are mapped to a Bell state. The global state is given now by:
 
 \begin{align*}
     \ket{\psi_1} &= \frac{1}{2} [ \ket{00}(\alpha\ket{0} + \beta\ket{1}) + \ket{01}(\alpha\ket{1} + \beta\ket{0}) \\
     &+ \ket{10}(\alpha\ket{0} - \beta\ket{1}) + \ket{11}(\alpha\ket{1} - \beta\ket{0}) ]
 \end{align*}
 
-Alice then performs a proyective measure on her two qubits, obtaining two classical variables $m_1, m_2 \in \{ 0,1 \} $. This measure destroys local entanglement, but transports the original unknown state to Bob's qubit. It actually transmits an encrypted version of $\ket{\psi}$, depending on the classical variables:
+Alice then performs a projective measure on her two qubits, obtaining two classical variables $m_1, m_2 \in \{ 0,1 \} $. This measure destroys local entanglement, but transports the original unknown state to Bob's qubit. It actually transmits an encrypted version of $\ket{\psi}$, depending on the classical variables:
 \begin{itemize}
     \item If $(m_1,m_2) = (0,0)$, the state is $\alpha \ket{0} + \beta \ket{1}$ ($\ket{\psi}$).
     \item If $(m_1,m_2) = (0,1)$, the state is $\alpha \ket{1} + \beta \ket{0}$ ($X\ket{\psi}$).
@@ -1490,17 +1664,17 @@ To recover the original state, we need to transmit the two classical bits to Bob
     \label{fig:teleportation_circuit_CZ}
 \end{figure}
 
-The election of quantum teleportation as the first routine to implement and optimize does not respond to an arbitrary volition, but rather to its structural relevance due to hardware limitations. The restricted local connectivity of fault-tolerant arquitectures makes the implementation of logical gates among distant planar patches prohibitive in terms of resources. Therefore, teleportation acquires an undisputed importance, allowing the propagation of quantum information along the processors, as well as being a fundamental ingredient for the transversal implementation of non-Clifford gates \cite{deBeaudrap2020}, surpassing the technical limitations imposed by the Eastin-Knill theorem.
+The selection of quantum teleportation as the first routine to implement and optimize does not respond to an arbitrary volition, but rather to its structural relevance due to hardware limitations. The restricted local connectivity of fault-tolerant architectures makes the implementation of logical gates among distant planar patches prohibitive in terms of resources. Therefore, teleportation acquires an undisputed importance, allowing the propagation of quantum information along the processors, as well as being a fundamental ingredient for the transversal implementation of non-Clifford gates \cite{deBeaudrap2020}, surpassing the technical limitations imposed by the Eastin-Knill theorem.
 
 \section{CHSH Game}
 
-The interest of implementing CHSH game (named after Clauser, Horne, Shimony and Holt \cite{CHSH}) resides on two reasons: it provides sufficient proof to demonstrate quantum advantage against any hidden variables theory; and it also justifies the introduction of non-Clifford resources in fault-tolerant architectures.
+The interest of implementing CHSH game (named after Clauser, Horne, Shimony and Holt \cite{CHSH}) resides in two reasons: it provides sufficient proof to demonstrate quantum advantage against any hidden variables theory; and it also justifies the introduction of non-Clifford resources in fault-tolerant architectures.
 
 CHSH game is a problem in information theory that can be modeled as a non-local cooperative game \cite{watrous2025understandingquantuminformationcomputation}. Two distant players, Alice and Bob, receive each a classical bit of information $x \in \{ 0,1 \}$ and $y \in \{ 0,1 \}$. Without any communication, each of them must produce an output bit $a \in \{ 0,1 \}$ and $b \in \{ 0,1 \}$, such that they satisfy this boolean relation:
 \begin{align*}
     a \oplus b = x \cdot y
 \end{align*}
-For any strategy restricted to classical phenomena, the probability of winning the game is upper bounded $P_{classic} \leq 0.75$. We can define a quantum strategy that violates this limit. This requires that Alice and Bob share an entangled pair of quibts, characterized by a Bell state $\ket{\Psi ^+} = 1/\sqrt{2}(\ket{00} + \ket{11})$. Let's discuss the quantum strategy in detail. We start by defining a qubit state vector $\ket{\psi_{\theta}}$ in terms of an angle $\theta$:
+For any strategy restricted to classical phenomena, the probability of winning the game is upper bounded $P_{classic} \leq 0.75$. We can define a quantum strategy that violates this limit. This requires that Alice and Bob share an entangled pair of qubits, characterized by a Bell state $\ket{\Psi ^+} = 1/\sqrt{2}(\ket{00} + \ket{11})$. Let's discuss the quantum strategy in detail. We start by defining a qubit state vector $\ket{\psi_{\theta}}$ in terms of an angle $\theta$:
 \begin{align*}
     \ket{\psi_{\theta}} = \cos(\theta) \ket{0} + \sin(\theta) \ket{1}
 \end{align*}
@@ -1508,7 +1682,7 @@ The inner product of any two of these vectors is given by:
 \begin{align*}
     \bra{\psi_{\alpha}} \ket{\psi_{\beta}} = \cos(\alpha) \cos(\beta) + \sin(\alpha) \sin(\beta) = \cos(\alpha - \beta)
 \end{align*}
-and if we commpute the inner product of the tensor product of any of these vectors with the Bell state $\ket{\Phi^+}$:
+and if we compute the inner product of the tensor product of any of these vectors with the Bell state $\ket{\Phi^+}$:
 \begin{align} \label{inner_product_CHSH}
     \bra{\psi_{\alpha} \otimes \psi_{\beta}} \ket{\Phi^+} = \frac{\cos(\alpha - \beta)}{\sqrt{2}}
 \end{align}
@@ -1517,7 +1691,7 @@ We also define a unitary matrix $U_\theta$:
     U_\theta = \ket{0} \bra{\psi_\theta} + \ket{1} \bra{\psi_{\theta+\pi/2}}
 \end{align*}
 
-Which in a standar convention would be $U_\theta = R_y(-2 \theta)$. Alice and Bob share an entangled pair of qubits (A,B) in state $\ket{\Phi^+}$. They receive the physical bit of information, and then perform an operation on their qubits, depending on which classical variable they received. If Alice receives $x=0$, she will perform $U_0$, and $U_{\pi/4}$ for $x=1$. On the other hand, Bob will perform $U_{\pi/8}$ for $y=0$ and $U_{-\pi/8}$ for $y=1$. After they perform this operation, they make a measure of their qubits, and the classical output they obtain are their answers. 
+Which in a standard convention would be $U_\theta = R_y(-2 \theta)$. Alice and Bob share an entangled pair of qubits (A,B) in state $\ket{\Phi^+}$. They receive the physical bit of information, and then perform an operation on their qubits, depending on which classical variable they received. If Alice receives $x=0$, she will perform $U_0$, and $U_{\pi/4}$ for $x=1$. On the other hand, Bob will perform $U_{\pi/8}$ for $y=0$ and $U_{-\pi/8}$ for $y=1$. After they perform this operation, they make a measure of their qubits, and the classical output they obtain are their answers. 
 
 For illustrative purposes, let's consider the case $(x,y)=(0,0)$ using equation \ref{inner_product_CHSH}:
 \begin{align*}
@@ -1553,11 +1727,11 @@ The Mermin-Peres magic square game is a pseudo-telepathy scenario that illustrat
     \item The cell where Alice's row and Bob's column intersect must contain the same value for both players.
 \end{itemize}
 
-It is easy to see that no classical strategy can produce a victory probability of 100\%, as this would imply the construction of a 3 x 3 matrix where all the rows add up to +1 and all the columns add up to -1, so the global product of the matrix evaluated on the rows would differ from that evalauted on the columns. 
+It is easy to see that no classical strategy can produce a victory probability of 100\%, as this would imply the construction of a 3 x 3 matrix where all the rows add up to +1 and all the columns add up to -1, so the global product of the matrix evaluated on the rows would differ from that evaluated on the columns. 
 
 However, the use of quantum resources may ensure a deterministically winning strategy. Alice and Bob would need to share two pairs of maximally entangled pairs of qubits. For instance, we could have a global state could described by $\ket{\Phi^+} \otimes \ket{\Phi^+}$. Each of them will take one qubit from each pair. 
 
-Instead of buildin a 3 x 3 matrix with $\pm1$ values, we construct a 3 x 3 ggrid composed of elements of $\mathcal{P}_2$. We can use this specific arrangement:
+Instead of building a 3 x 3 matrix with $\pm1$ values, we construct a 3 x 3 grid composed of elements of $\mathcal{P}_2$. We can use this specific arrangement:
 
 \[
 \renewcommand{\arraystretch}{2.5}
@@ -1611,7 +1785,7 @@ Hence, by applying this specific sequence of operators and measuring the first t
 
 \chapter{Results} \label{ch:Results}
 
-We discuss the PyZX implementations of the three quantum routines presented above.
+We discuss the PyZX implementations of the three quantum routines presented above. The codes are available in the repository \cite{Github}.
 
 \section{Teleportation in PyZX}
 
@@ -1619,7 +1793,7 @@ In order to implement quantum teleportation in PyZX, we need to represent the pr
 
 Firstly, we instantiate the logical gates of the circuit and convert it to a graph. This conversion does not include neither the preparation of the initial states nor the final measures. For the EPR pair, we need to initialize both logical qubits in the base state $\ket{0}$, which is performed by adding a red degree-1 node at the begining of each line. Alice's projective measures are performed in an identical way. Finally, the realisation of the classical control admits different options:
 \begin{itemize}
-    \item \textbf{Partial Quantum Assimilation} We simply instantiate the circuit in figure \ref{fig:teleportation_circuit_CZ}. The resulting diagram will have operations among separate qubits, apparently violating the 2DNN connectivity. However, we do not interpret those edges as quantum interactions, but rather as the diagramatic representation of the classical control after the projective measures. This approach allows the simplification routines to absorb the measures subproducts, while also ensuring the semantic equivalence between the compiled graph and the original circuit.
+    \item \textbf{Partial Quantum Assimilation} We simply instantiate the circuit in figure \ref{fig:teleportation_circuit_CZ}. The resulting diagram will have operations among separate qubits, apparently violating the 2DNN connectivity. However, we do not interpret those edges as quantum interactions, but rather as the diagrammatic representation of the classical control after the projective measures. This approach allows the simplification routines to absorb the measures subproducts, while also ensuring the semantic equivalence between the compiled graph and the original circuit.
     \item \textbf{Strict Quantum Assimilation} We could consider both \texttt{CNOT} and \texttt{CZ} gates as genuine quantum interactions. In order to preserve 2DNN connectivity, this approach forces us to include a \texttt{SWAP} gate in the first two qubits. The computational cost of this gate makes this option ignorable, as the interest of the teleportation protocol consists precisely in the possibility of replacing the necessity of \texttt{SWAP} gates.
     \item \textbf{Classical Control Externalization} We supress the classical control operations in our diagram, faithfully representing the quantum operations involved in the protocol. This option breaks the possibility of performing semantic verification.
 \end{itemize}
@@ -1669,7 +1843,7 @@ Once again, instead of using the \texttt{full\_reduce} routine, we break it into
     \label{fig:teleportation4}
 \end{figure}
 
-Previously, the classical control operations allowed the simplification routine to collapse the diagram to the logical identity. Now, the result of the routine can be put in a direct isomorphism with lattice surgery operations. We have a unique entry node representing the original state $\ket{\psi}_L$ encoded in a logical qubit conformed by three logical patches, and through two smooth splits we obtain three highly entangled logical qubits. By performing the projective measures on the two first qubits, and the corresponding Pauli operations on the third, we obtain the origianl state $\ket{\psi}_L$ in the last qubit. 
+Previously, the classical control operations allowed the simplification routine to collapse the diagram to the logical identity. Now, the result of the routine can be put in a direct isomorphism with lattice surgery operations. We have a unique entry node representing the original state $\ket{\psi}_L$ encoded in a logical qubit constituted by three logical patches, and through two smooth splits we obtain three highly entangled logical qubits. By performing the projective measures on the two first qubits, and the corresponding Pauli operations on the third, we obtain the original state $\ket{\psi}_L$ in the last qubit. 
 
 If we compare figures \ref{fig:teleportation3} and \ref{fig:teleportation4}, we see that the maximum layer index is reduced from 4 to 3. This represents a huge improvement in the execution time of the algorithm. Also, the pathwidth is reduced from 4 to 3, optimizing the number of logical patches necessary for the implementation. 
 
@@ -1716,18 +1890,18 @@ Now we can connect a key element of quantum information theory with the hardware
     \label{fig:CHSH2}
 \end{figure}
 
-Bob's measurements require rotations in the $Y$ axis with angles of $\pm \pi /4$, which are not elements of the Clifford group. The simplification routines cannot annihilate them, and this is not an avoidable hardware limitation but rather a consequence of the Eastin-Knill theorem, as our fault-tolerant architecture necessarily lacks of a universal set of transversal quantum gates. 
+Bob's measurements require rotations in the $Y$ axis with angles of $\pm \pi /4$, which are not elements of the Clifford group. The simplification routines cannot annihilate them, and this is not an avoidable hardware limitation but rather a consequence of the Eastin-Knill theorem, as our fault-tolerant architecture necessarily lacks a universal set of transversal quantum gates. 
 
 Consequently, the realisation of the CHSH protocol forces the compiler to invoke magic state injection protocols \cite{robertson2025resourceallocatingcompilerlattice}, which are extremely costly, as we have already discussed. The greatest contribution to the space-time volume for this realisation comes from the requirement of non-Clifford resources, not from generating the initial entanglement.
 
-Even so, we perform our simplification routine to each of the four possible diagrams. The procedure yields a significat reduction of Clifford gates, depicted in figure \ref{fig:CHSH3}, which, as we have already stated, does not imply a huge reduction of execution time, but it is still an optimization. 
+Even so, we perform our simplification routine to each of the four possible diagrams. The procedure yields a significant reduction of Clifford gates, depicted in figure \ref{fig:CHSH3}, which, as we have already stated, does not imply a huge reduction of execution time, but it is still an optimization. 
 \begin{figure} [ht]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/CHSH3.png}
     \caption{Simplification of the ZX diagram for the implementation of CHSH game, corresponding to $(x,y)=(0,0)$.}
     \label{fig:CHSH3}
 \end{figure}
-The topological depth for each of the four branches is reduced from 5 to 3. The pathwidth remains the same. The traslation of the diagram to lattice surgery primitives is inmediate:
+The topological depth for each of the four branches is reduced from 5 to 3. The pathwidth remains the same. The translation of the diagram to lattice surgery primitives is immediate:
 \begin{itemize}
     \item We prepare a logical qubit in the state $\ket{0} + e^{i 3 \pi /2} \ket{1}$.
     \item A smooth split is performed, and then we apply a $T$ gate on Bob's qubit.
@@ -1746,7 +1920,7 @@ The topological depth is reduced from 5 in figure \ref{fig:CHSH2} to 4 in figure
 
 \section{Magic Square Game in PyZX}
 
-The evaluation of the Mermin-Peres magic square game introduces the verification of quantum contextuality and pseudo-telepathy in fault-tolerant architectures. Unlice the CHSH protocol, which pursues a statistical limit, the Mermin-Peres game demands the verification of a strict deterministic victory, overcoming the classical bound of $8/9$ for this problem. 
+The evaluation of the Mermin-Peres magic square game introduces the verification of quantum contextuality and pseudo-telepathy in fault-tolerant architectures. Unlike the CHSH protocol, which pursues a statistical limit, the Mermin-Peres game demands the verification of a strict deterministic victory, overcoming the classical bound of $8/9$ for this problem. 
 
 The protocol requires Alice and Bob to share two pairs of entangled qubits. The instantiation of the circuit begins by creating those two pairs. Next, each player performs the operations corresponding to their observables for the determined row and column. This produces nine different diagrams, with three different subdiagrams for each player's qubit.
 
@@ -1755,17 +1929,17 @@ The validation of the strategy requires a similar approach to the CHSH game. We 
 \begin{figure} [ht]
     \centering
     \includegraphics[width=0.5\textwidth]{figures/MS2.png}
-    \caption{ZX diagram for row 3 and column 0, representin the circuit in \ref{fig:mermin_peres_circuit}, with boundary conditions corresponding to the covector $\bra{0000}$.}
+    \caption{ZX diagram for row 3 and column 0, representing the circuit in \ref{fig:mermin_peres_circuit}, with boundary conditions corresponding to the covector $\bra{0000}$.}
     \label{fig:MS2}
 \end{figure}
 
-As we saw in the CHSH game, this is an expected consequence from the fact that the graph does not have open wires, meaning it represents a rank-0 tensor (a scalar). The collapse allows us to evaluate the protocol, as the probability amplitude of each stochastic branch is encapsulated withi the global scalar factor of the diagram. 
+As we saw in the CHSH game, this is an expected consequence from the fact that the graph does not have open wires, meaning it represents a rank-0 tensor (a scalar). The collapse allows us to evaluate the protocol, as the probability amplitude of each stochastic branch is encapsulated within the global scalar factor of the diagram. 
 
 Hence, we extract those amplitudes and obtain the output probabilities for each selection of row and column. By comparing those outputs with the winning conditions, we are able to compute the success probability of the strategy. The application of this method yields us a probability of victory of 1.0, verifying the deterministically winning strategy.
 
 The translation of the Mermin-Peres game, from its abstraction in quantum information theory towards its realisation in a fault-tolerant architecture,requires some modifications to the previous diagrams, attending to the spatial limitations imposed by the hardware. 
 
-The initial preparation of the Bell pairs assume global connectivity, which is manifested in the first two \texttt{CNOT} gates of figure \ref{fig:MS1}. The physical execution of those gates is not viable under the hardware restrictions we are considering for our architecture. In order to fix this and preserve 2DNN connectivity, we are forced to use a \texttt{SWAP} gate, which constitutes an importat operative bottleneck. The realisation of the protocol will then begin by the preparation of two Bell pairs, and then we will perform a \texttt{SWAP} gate to interchange one qubit from each pair.
+The initial preparation of the Bell pairs assume global connectivity, which is manifested in the first two \texttt{CNOT} gates of figure \ref{fig:MS1}. The physical execution of those gates is not viable under the hardware restrictions we are considering for our architecture. In order to fix this and preserve 2DNN connectivity, we are forced to use a \texttt{SWAP} gate, which constitutes an important operative bottleneck. The realisation of the protocol will then begin by the preparation of two Bell pairs, and then we will perform a \texttt{SWAP} gate to interchange one qubit from each pair.
 
 \begin{figure} [ht]
     \centering
@@ -1774,7 +1948,7 @@ The initial preparation of the Bell pairs assume global connectivity, which is m
     \label{fig:MS3}
 \end{figure}
 
-Compared to the implementation of the CHSHS game, the Mermin-Peres games does not require the use of non-Clifford gates, thus suppressing the necessity of magic-states distillation. The diagram has a higher number of nodes and edges, so the obtention of its topological depth requires the algorithmic approach for the orientation of vertical edges presented in chapter \ref{ch:PP}. This case, as well as the other eight diagrams, constitute trivial cases for the execution of the algorithm, as there are no vertical edges connecting nodes with the same depth. We can build some intuition of the method by looking at figure \ref{fig:MS4}. For the trivial cases where $L_{in}(u) = L_{in}(v)$, we just need to draw the vertex in an explicit layer distribution, so each of the vertical edges will be drawn as a diagonal and will be oriented in the direction of time flux.
+Compared to the implementation of the CHSH game, the Mermin-Peres games does not require the use of non-Clifford gates, thus suppressing the necessity of magic-states distillation. The diagram has a higher number of nodes and edges, so the obtention of its topological depth requires the algorithmic approach for the orientation of vertical edges presented in chapter \ref{ch:PP}. This case, as well as the other eight diagrams, constitute trivial cases for the execution of the algorithm, as there are no vertical edges connecting nodes with the same depth. We can build some intuition of the method by looking at figure \ref{fig:MS4}. For the trivial cases where $L_{in}(u) = L_{in}(v)$, we just need to draw the vertex in an explicit layer distribution, so each of the vertical edges will be drawn as a diagonal and will be oriented in the direction of time flux.
 
 \begin{figure}
     \centering
@@ -1783,7 +1957,7 @@ Compared to the implementation of the CHSHS game, the Mermin-Peres games does no
     \label{fig:MS4}
 \end{figure}
 
-The next step is to perform the simplification routine on each diagram. The simple execution of \texttt{full\_reduce} produces graphs without possible translation to lattice surgery operations, so we once again use the escalonated simplification routine. We then select the last intermediate optimization that admits an interpretation as a physical realisation of the protocol. The result for the diagram in figure \ref{fig:MS3} can ben seen in figure \ref{fig:MS5}.
+The next step is to perform the simplification routine on each diagram. The simple execution of \texttt{full\_reduce} produces graphs without possible translation to lattice surgery operations, so we once again use the stepped simplification routine. We then select the last intermediate optimization that admits an interpretation as a physical realisation of the protocol. The result for the diagram in figure \ref{fig:MS3} can be seen in figure \ref{fig:MS5}.
 
 \begin{figure} [ht]
     \centering
@@ -1792,7 +1966,7 @@ The next step is to perform the simplification routine on each diagram. The simp
     \label{fig:MS5}
 \end{figure}
 
-We can compare the computational cost metrics for the primitive and the optimized diagrams. The data in table \ref{tab:optimization_data} shows that the simplification method reduces the depth of our diagrams in average around an $18\%$, and the pathdwidth is reduced on average approximately in a $9\%$. Out of the 9 diagrams, 7 of them had a reduced depth once they were simplified, and 5 of them reduced their pathwidth. All the graphs improved at least one of the metrics after the optimization. 
+We can compare the computational cost metrics for the primitive and the optimized diagrams. The data in table \ref{tab:optimization_data} shows that the simplification method reduces the depth of our diagrams in average around an $18\%$, and the pathwidth is reduced on average approximately in a $9\%$. Out of the 9 diagrams, 7 of them had a reduced depth once they were simplified, and 5 of them reduced their pathwidth. All the graphs improved at least one of the metrics after the optimization. 
 
 \begin{table}[ht]
     \centering
@@ -1805,7 +1979,7 @@ We can compare the computational cost metrics for the primitive and the optimize
         Original Depth & 7  & 6  & 8  & 7  & 6  & 8  & 8  & 8  & 8  \\
         Original Pathwidth & 6 & 6 & 6 & 6 & 6 & 6 & 6 & 6 & 7 \\
         Optimized Depth & 5 & 6 & 6 & 6 & 6 & 6 & 6 & 6 & 7 \\
-        Optimmized Pathwidth & 5 & 5 & 6 & 5 & 5 & 6 & 6 & 6 & 6 \\
+        Optimized Pathwidth & 5 & 5 & 6 & 5 & 5 & 6 & 6 & 6 & 6 \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -1820,13 +1994,227 @@ The execution of the primitive operations of lattice surgery implies projective 
 
 We have seen how ZX calculus can perform the role of graphical language for fault-tolerant computation, constituting the analytical core of this work. ZX calculus does not only provide the visual support to compile quantum protocols into lattice surgery operations, but also the algebraic tools for the validation and optimization of said protocols.
 
-The validation of the logical architectures has been materialized through the PyZX ecosystem. For the teleportation protocol, the set of diagrams parametrized by the measurement outcomes has been evaluated. The graph theoretic reduction routine has collapsed this set of diagrams towards an identity channel, thus verifying the functionality of quantum teleportation in a faul-tolerant architecture, which constitutes a trascendental protocol for the transversal execution of non-Clifford gates, as well as for the execution of operations requiring the interaction of distant qubits.
+The validation of the logical architectures has been materialized through the PyZX ecosystem. For the teleportation protocol, the set of diagrams parametrized by the measurement outcomes has been evaluated. The graph theoretic reduction routine has collapsed this set of diagrams towards an identity channel, thus verifying the functionality of quantum teleportation in a fault-tolerant architecture, which constitutes a transcendental protocol for the transversal execution of non-Clifford gates, as well as for the execution of operations requiring the interaction of distant qubits.
 
 Analogously, the evaluation of the CHSH game has validated the entanglement and quantum correlations. The magic square game has demonstrated the possibility of contextuality in this paradigm.
 
-Finally, the execution of optimization routines has yielded a significan reduction of the space-time volume of the different protocols we have discussed, materializing the optimization potential of ZX calculus.
+Finally, the execution of optimization routines has yielded a significant reduction of the space-time volume for the different protocols we have discussed, materializing the optimization potential of ZX calculus.
 
 \newpage
 \printbibliography
+
+\newpage
+
+\appendix
+
+\chapter{Algebraic Foundations of ZX Calculus} \label{ch:AFZX}
+
+ZX calculus has been introduced primarily as a syntactic and operational tool. In equation \ref{ZX_spiders}, the $Z$ and $X$ spiders are defined as projectors over the computational and diagonal bases, respectively. On the other hand, the topological meta-rule that allows diagrammatic deformations as well as the spider fusion rule from equation \ref{rule:spider_fusion} might appear as convenient but some-what ad-hoc graphical heuristics for tensor contraction. To grasp the analytical power of ZX calculus, we should transcend this merely syntactic view, by presenting a formal mathematical treatment, matching the rigour of chapters \ref{ch:TQEC} and \ref{ch:LS}.
+
+\section*{Categorical Foundations}
+
+\begin{definition}
+    A monoidal category is a category $C$ equipped with a tensor product $\otimes$ that combines object $A$ and $B$ into composite objects $A \otimes B$ and morphisms $f$ and $g$ into parallel operations $f \otimes g$, with a monoidal unit $I \in \text{Obj}(C)$ \cite{cowtan2025homologyhopfalgebrasquantum}.
+\end{definition}
+
+Monoidal categories are interesting from a computational point of view as they allow us to characterize the parallel evolution of different systems. ZX diagrams can be formally defined as morphisms within a specific monoidal category denoted as \ZXc. The objects of said category are the natural numbers $n,m \in \mathbb{N}$, representing the number of input and output wires of a diagram. The tensor product is defined as an integer addition $n \otimes m = n + m$ \cite{vandewetering2020zxcalculusworkingquantumcomputer}. The ZX diagrams are the morphisms of this category, meaning that a diagram with $n$ inputs and $m$ outputs is nothing but a morphism $D:n \rightarrow m$
+
+ZX calculus treats inputs and outputs interchangeably, which is extremely useful but also seemingly unjustified. This is actually obtained by bending wires, but to understand it we need to introduce additional structure. We define two special morphisms called cups and caps and represented as \cite{KissingerWetering2024Book}: 
+
+\begin{equation}
+\begin{tikzpicture}[baseline={([yshift=-.5ex]0,0)}]
+  \draw (0,1) arc (90:270:1);
+\end{tikzpicture} 
+= \ket{00} + \ket{11} \qquad \qquad
+\begin{tikzpicture}[baseline={([yshift=-.5ex]0,0)}]
+  \draw (0,-1) arc (-90:90:1);
+\end{tikzpicture} 
+= \bra{00} + \bra{11}
+\end{equation}
+
+Intuitively, cups and caps bend an input wire to become an output, and vice versa. Cups satisfy the following relation with spiders:
+
+\begin{equation} \label{cups_symmetry}
+\begin{tikzpicture}[baseline=(a1.base)]
+    % --- LADO IZQUIERDO ---
+    \begin{scope}[xshift=0cm]
+        % Nodo central
+        \node[draw, circle, inner sep=2pt, fill=green!20, font=\large] (a1) at (0,0) {$\alpha$};
+        
+        % Cable superior (cruza por encima y entra por la derecha)
+        \draw (-1.5, 0.9) -- (0.8, 0.9) .. controls (1.7, 0.9) and (1.3, 0.2) .. (a1.45);
+        
+        \draw (-1.5, -0.1) to[out=0, in=170] (a1);
+        \draw (-1.5, -0.6) to[out=0, in=210] (a1);
+        \node at (-1.2, -0.35) {$\vdots$};
+        
+        % Outputs (derecha)
+        \draw (a1) to[out=-15, in=180] (1.5, -0.1);
+        \draw (a1) to[out=-45, in=180] (1.5, -0.6);
+        \node at (1.2, -0.35) {$\vdots$};
+
+        % Llaves y etiquetas
+        \draw [decorate,decoration={brace,amplitude=5pt}] 
+            (-1.6, -0.7) -- (-1.6, 0.0) node [midway, left=8pt] {$n$};
+        \draw [decorate,decoration={brace,amplitude=5pt, mirror}] 
+            (1.6, -0.7) -- (1.6, 0.0) node [midway, right=8pt] {$m$};
+    \end{scope}
+
+    % --- SIGNO IGUAL ---
+    % Situado con espacio suficiente para evitar solapamientos
+    \node at (3.8, 0) {\Large $\mathbf{=}$};
+
+    % --- LADO DERECHO ---
+    \begin{scope}[xshift=7.6cm]
+        % Nodo central
+        \node[draw, circle, inner sep=2pt, fill=green!20, font=\large] (a2) at (0,0) {$\alpha$};
+        
+        % Cable superior (desenredado, entra directo desde arriba-izquierda)
+        \draw (-1.5, 0.9) to[out=0, in=110] (a2.110);
+        
+        \draw (-1.5, -0.1) to[out=0, in=170] (a2);
+        \draw (-1.5, -0.6) to[out=0, in=210] (a2);
+        \node at (-1.2, -0.35) {$\vdots$};
+        
+        % Outputs (derecha) - idénticos al lado izquierdo
+        \draw (a2) to[out=-15, in=180] (1.5, -0.1);
+        \draw (a2) to[out=-45, in=180] (1.5, -0.6);
+        \node at (1.2, -0.35) {$\vdots$};
+
+        % Llaves y etiquetas
+        \draw [decorate,decoration={brace,amplitude=5pt}] 
+            (-1.6, -0.7) -- (-1.6, 0.0) node [midway, left=8pt] {$n$};
+        \draw [decorate,decoration={brace,amplitude=5pt, mirror}] 
+            (1.6, -0.7) -- (1.6, 0.0) node [midway, right=8pt] {$m$};
+    \end{scope}
+\end{tikzpicture}
+\end{equation}
+
+Which can be easily verified in bra-ket notation:
+
+\begin{equation*}
+    \Big( \bra{00} + \bra{11} \Big) \Big( \ket{\underbrace{0 \cdots 0}_{m+1}} \bra{\underbrace{0 \cdots 0}_{n}} + e^{i \alpha} \ket{{\underbrace{1 \cdots 1}_{m+1}}} \bra{\underbrace{1 \cdots 1}_{n}} \Big) = \ket{\underbrace{0 \cdots 0}_{m}} \bra{\underbrace{0 \cdots 0}_{n+1}} + e^{i \alpha} \ket{{\underbrace{1 \cdots 1}_{m}}} \bra{\underbrace{1 \cdots 1}_{n+1}} 
+\end{equation*}
+
+For the symmetry relation of caps and spiders, we have:
+
+\begin{equation} \label{caps_symmetry}
+\begin{tikzpicture}[baseline=(a1.base)]
+    % --- LADO IZQUIERDO ---
+    \begin{scope}[xshift=0cm]
+        % Nodo central
+        \node[draw, circle, inner sep=2pt, fill=green!20, font=\large] (a1) at (0,0) {$\alpha$};
+        
+        % Cable superior (viene de la derecha, hace un "U-turn" a la izquierda y entra por arriba-izquierda)
+        \draw (1.5, 1.2) -- (-0.8, 1.2) .. controls (-1.8, 1.2) and (-1.8, 0.3) .. (a1.140);
+        
+        % Otros inputs (izquierda)
+        \draw (-1.5, 0.3) to[out=0, in=170] (a1);
+        \node at (-1.2, -0.15) {$\vdots$};
+        \draw (-1.5, -0.6) to[out=0, in=210] (a1);
+        
+        \draw (a1) to[out=10, in=180] (1.5, 0.2);
+        \node at (1.2, -0.15) {$\vdots$};
+        \draw (a1) to[out=-40, in=180] (1.5, -0.6);
+
+        % Llaves y etiquetas
+        \draw [decorate,decoration={brace,amplitude=5pt}] 
+            (-1.6, -0.7) -- (-1.6, 0.4) node [midway, left=8pt] {$n$};
+        \draw [decorate,decoration={brace,amplitude=5pt, mirror}] 
+            (1.6, -0.7) -- (1.6, 0.4) node [midway, right=8pt] {$m$};
+    \end{scope}
+
+    % --- SIGNO IGUAL ---
+    \node at (3.5, 0) {\Large $\mathbf{=}$};
+
+    % --- LADO DERECHO ---
+    \begin{scope}[xshift=7.0cm]
+        % Nodo central
+        \node[draw, circle, inner sep=2pt, fill=green!20, font=\large] (a2) at (0,0) {$\alpha$};
+        
+        % Cable superior (desenredado, sale del nodo hacia la derecha)
+        \draw (a2.70) .. controls (0.2, 0.8) and (0.6, 1.2) .. (1.5, 1.2);
+        
+        % Otros inputs (izquierda) 
+        \draw (-1.5, 0.3) to[out=0, in=150] (a2);
+        \node at (-1.2, -0.15) {$\vdots$};
+        \draw (-1.5, -0.6) to[out=0, in=210] (a2);
+        
+        % Outputs (derecha) - idénticos al lado izquierdo
+        \draw (a2) to[out=30, in=180] (1.5, 0.5);
+        \node at (1.2, -0.15) {$\vdots$};
+        \draw (a2) to[out=-40, in=180] (1.5, -0.6);
+
+        % Llaves y etiquetas
+        \draw [decorate,decoration={brace,amplitude=5pt}] 
+            (-1.6, -0.7) -- (-1.6, 0.4) node [midway, left=8pt] {$n$};
+        \draw [decorate,decoration={brace,amplitude=5pt, mirror}] 
+            (1.6, -0.7) -- (1.6, 0.5) node [midway, right=8pt] {$m$};
+    \end{scope}
+\end{tikzpicture}
+\end{equation}
+
+Which once again is immediate if we use bra-ket notation:
+
+\begin{equation*}
+    \Big( \ket{\underbrace{0 \cdots 0}_{m}} \bra{\underbrace{0 \cdots 0}_{n+1}} + e^{i \alpha} \ket{{\underbrace{1 \cdots 1}_{m}}} \bra{\underbrace{1 \cdots 1}_{n+1}}  \Big) \Big( \ket{00} + \ket{11} \Big) = \ket{\underbrace{0 \cdots 0}_{m+1}} \bra{\underbrace{0 \cdots 0}_{n}} + e^{i \alpha} \ket{{\underbrace{1 \cdots 1}_{m+1}}} \bra{\underbrace{1 \cdots 1}_{n}} 
+\end{equation*}
+
+Equations \ref{cups_symmetry} and \ref{caps_symmetry} also hold for $Z$ spiders and formally prove that bending wires is perfectly valid. A symmetric monoidal category with cap and cup-like structures is a compact closed category, which is the principal structure of categorical quantum information \cite{abramsky2007categoricalsemanticsquantumprotocols}. It is this characterisation what proves the fact that we can move the generators around the diagram without altering its semantics \cite{KELLY1980193}.
+
+\begin{definition}
+    A dagger category is a category $\ C$ equipped with an involutive, identity-on-objects, contravariant functor $\dagger: C \rightarrow C$. If $\ C$ is a symmetric monoidal category and $\dagger$ preserves the symmetric monoidal structure, then $C$ is a dagger symmetric monoidal category \cite{SELINGER2007139}.
+\end{definition}
+ 
+We indeed have such a functor in \ZXc, as it consists of flipping any ZX diagram horizontally and changing the signs of all the phases. Therefore, \ZXc \ is a dagger compact closed category. The deformation and inversion of the diagrams that this category allows is the foundation for the meta-rule of ZX calculus: only connectivity matters.
+
+The semantic meaning of ZX diagrams reside in the category of finite-dimensional complex vector spaces, specifically the subcategory \Qubit \cite{vandewetering2020zxcalculusworkingquantumcomputer}. The objects of \Qubit \ are also the natural numbers, and we interpret $n \in \mathbb{N}$ as the vector space $\mathbb{C}^{2^n}$. The tensor product is the regular tensor product of vector spaces. The morphisms in this category are linear maps $f: \mathbb{C}^{2^n} \rightarrow \mathbb{C}^{m}$. We define the interpretation of a ZX diagram as a functor $[[\cdot]] : \ZXc \rightarrow \Qubit$. For the objects, we simply have $[[n]] = n$, and for a diagram $D$ we set $[[D]]$ to be the linear map that the diagram represents.
+
+Theorem \ref{universality} proves that the interpretation of ZX diagrams is a full functor, i.e., for any $f: \mathbb{C}^{2^n} \rightarrow \mathbb{C}^{m}$ there is a diagram $D:n \rightarrow m$ such that $[[D]] = f$. However, the interpretation functor is not faithful, meaning that the equality $[[D]] = [[D']]$ does not imply $D = D'$. This is fairly obvious, as the rewrite strategies of chapter \ref{ch:LS} yield different diagrams representing the same linear map. We can define the quotient category $\ZXc / \sim $, where $\sim$ is an equivalence relation such that two diagrams that can be rewritten into one another are identified. If the rewrite ruleset we use to define the equivalence relation is complete (meaning that any two diagrams representing the same linear map can be rewritten into one another), then the interpretation functor of the quotient category is indeed faithfull \cite{vandewetering2020zxcalculusworkingquantumcomputer}. This may seem trivial, but completeness is a central topic in ZX calculus and the discussion proves that it can be formally viewed as a property of the functor $[[\cdot]]$.
+
+\section*{Monoids, comonoids and Frobenius Algebra}
+
+\begin{definition}
+    In a monoidal category $(C, \otimes, I)$, a monoid is an object $A \in \text{Obj}(C)$ with two structural morphisms: a multiplication operation $\mu : A \otimes A \rightarrow A$ and a unit morphism $\eta : I \rightarrow A$ such that they satisfy the axiom of associativity $\mu \circ ( \mu \otimes \text{id}_A) = \mu \circ (\text{id}_A \otimes \mu)$ and the left and right unit laws \cite{Ross2004}. 
+\end{definition}
+
+In quantum information, monoids model processes in which two systems are merged into a unified subspace. By inverting the directions of the morphisms, one could define a dual concept, known as a comonoid:
+
+\begin{definition}
+    In a monoidal category $(C, \otimes, I)$, a comonoid is an object $A \in \text{Obj}(C)$ with two structural morphisms: a comultiplication operation $\delta: A \rightarrow A \otimes A$ and a counit $\epsilon : A \rightarrow I$ such that they satisfy the axiom of coassociativity $(\delta \otimes \text{id}_A) \circ \delta = (\text{id}_A \otimes \delta) \circ \delta$ and the corresponding counit laws. 
+\end{definition}
+
+If a given object has a monoid and a comonoid, we could compose their corresponding morphisms and study their interaction. We would like to find that this interaction respects some symmetry, specifically, that the sequential composition of a comultiplication and a multiplication should be topologically equivalent to the same composition applied to parallel assymetric channels. This is captured in the Frobenius condition, that defines what a Frobenius algebra is:
+
+\begin{definition}
+     In a monoidal category $(C, \otimes, I)$, a Frobenius algebra is an object $A \in \text{Obj}(C)$ equipped with a monoid $(A, \mu, \eta)$ and a comonoid $(A, \delta, \epsilon)$, such that the Frobenius condition holds:
+     \begin{equation}
+        (\text{id}_A \otimes \mu) \circ (\delta \otimes \text{id}_A) = \delta \circ \mu = (\mu \otimes \text{id}_A) \circ (\text{id}_A \otimes \delta)
+     \end{equation}
+\end{definition}
+
+Intuitively, a graph consisting of multiplications and comultiplications can be topologically deformed without altering the underlying operator. We could demand some additional axiomatic restrictions \cite{coecke2009classicalquantumstructuralism}:
+\begin{enumerate}
+    \item Commutativity: The monoid must be commutative, $\mu \circ \sigma_{A,A} = \mu$, where $\sigma_{A,A}$ is the symmetry isomorphism of the category.
+    \item Special Condition: The composition of comultiplication and multiplication is the identity $\mu \circ \delta = \text{id}_A$.
+    \item Dagger structure: The structure of the comonoid should be obtained by the application of the dagger functor on the monoid, $\delta = \mu^\dagger$ and $\epsilon = \eta^\dagger$.
+\end{enumerate}
+
+If a Frobenius algebra satisfies this three conditions, it will be called a dagger-special commutative Frobenius algebra, or $\dagger$-SCFA. It is easy to note that the $Z$ and $X$ generators of the ZX calculus are exactly $\dagger$-SCFAs. The spider fusion rule from equation \ref{rule:spider_fusion} naturally emanates from the axioms of Frobenius algebras, ensuring the associativity and coassociativity, as well as the Frobenius condition. 
+
+The $\dagger$-SCFA characterises a single spider, $Z$ or $X$. The interaction between both spiders is called a bialgebra and it consists of a monoid and a comonoid corresponding to each algebra and satisfying a commutation relation that is equivalent to equation \ref{rule:strong_complementary} \cite{vandewetering2020zxcalculusworkingquantumcomputer}. If we have both algebras, and the sub-index of each morphism denotes the generator it is associated with, $\delta_Z \circ \mu_X = \mu_X \circ \delta_Z$ and vice versa. 
+
+If we define an antipode morphism $S: A \rightarrow A$ satisfying the Hopf law:
+
+\begin{equation} \label{Hopf_Law}
+    \mu \circ (\text{id} \otimes S) \circ \delta =\mu \circ (S \otimes \text{id}) \circ \delta = \eta \circ \epsilon
+\end{equation}
+
+where $\mu$ denotes the multiplication and $\delta$ the comultiplication of a bialgebra, we elevate it to a Hopf algebra \cite{cowtan2025homologyhopfalgebrasquantum}. Two $\dagger$-SCFAs that are Hopf algebras in both possible combinations of monoid and comonoid is a Hopf-Frobenius algebra. $Z$ generators and $X$ generators constitute a Hopf-Frobenius algebra, where the antipode is the indentity.
+
+A fundamental result in categorical quantum mechanics states a bijective correspondence between orthonormal basis in the category of finite dimensional Hilbert spaces \catname{FdHilb} and $\dagger$-SCFAs \cite{COECKE_2012}. This relation alongside the Hopf law constitutes the regular complementarity of mutually unbiased bases, i.e., given two orthonormal bases $Z = \{\ket{z_i}\}$ and $X = \{\ket{x_1}\}$ that are mutually unbiased ($|\bra{z_i} \ket{x_j}|^2 = 1/d \ \forall i,j$ where $d$ is the dimension of the Hilbert space), maximal information about the outcome of a $Z$ measurement yields minimal information about the outcome of a $X$ measurement \cite{KissingerWetering2024Book}. What we have discussed can be seen as the formal generalization of a well-known result of quantum mechanics in the language of monoidal categories theory, providing a physically coherent foundation for ZX calculus.
+
+There is an obvious correspondence between lattice surgery operations and the structural morphisms of $\dagger$-SCFAs. Lattice splits act as a monoidal comultiplication on \catname{FdHilb}, $\delta: V \rightarrow V \otimes V$, and merges as a multiplication $\mu : V \otimes V\rightarrow V$. This perfectly matches with the correspondence between lattice surgery and ZX calculus discussed in chapter \ref{ch:LS}.
+
 
 \end{document}
